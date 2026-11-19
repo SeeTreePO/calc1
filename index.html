@@ -1,0 +1,554 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Калькулятор колекції карток</title>
+<style>
+:root{color-scheme:dark;--bg:#11151b;--panel:#1a2029;--panel2:#222a35;--text:#eef2f7;--muted:#aab5c3;--line:#3b4655;--accent:#75b7ff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;padding:18px}
+main{max-width:900px;margin:0 auto}
+h1{font-size:1.35rem;margin:0 0 16px}
+h2{font-size:1.05rem;margin:0 0 12px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;margin:0 0 14px}
+.inputs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+label.field{display:block;color:var(--muted);font-size:.9rem}
+input[type=number]{display:block;width:100%;margin-top:6px;background:var(--panel2);color:var(--text);border:1px solid #526071;border-radius:9px;padding:11px;font:inherit;font-variant-numeric:tabular-nums}
+input:focus{outline:2px solid var(--accent);outline-offset:1px}
+.hint{color:var(--muted);font-size:.82rem;margin:10px 0 0}
+.sliders{display:grid;gap:13px}
+.slider-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center}
+.slider-row label{font-weight:600}
+.slider-row 
+.count{font-variant-numeric:tabular-nums;color:var(--muted);min-width:52px;text-align:right}
+input[type=range]{width:100%;margin:8px 0 0;accent-color:var(--accent);touch-action:pan-y}
+input.legendary{accent-color:#f2a340}
+input.epic{accent-color:#e36bd5}
+input.rare{accent-color:#67baff}
+input.common{accent-color:#7acb83}.graph-wrap{width:100%;overflow:hidden}
+svg{display:block;width:100%;height:auto;touch-action:pan-y;user-select:none}
+.axis{stroke:#758295;stroke-width:1}.gridline{stroke:#3a4553;stroke-width:1;stroke-dasharray:3 4}
+.tick{fill:#aab5c3;font-size:11px}.axis-title{fill:#dce4ee;font-size:12px}
+.curve{fill:none;stroke:#75b7ff;stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
+.marker{stroke:#ffca65;stroke-width:2.5;cursor:ew-resize;pointer-events:stroke}
+.marker-dot{fill:#ffca65;stroke:#11151b;stroke-width:2;pointer-events:none}
+.marker-label{fill:#ffda91;font-size:12px;font-weight:700}
+.stats{margin:12px 0 0;font-variant-numeric:tabular-nums}
+button{margin-top:14px;border:0;border-radius:10px;padding:12px 16px;background:#315f8d;color:white;font:600 1rem system-ui;cursor:pointer}
+button:active{transform:translateY(1px)}
+.small{font-size:.82rem;color:var(--muted)}
+@media(max-width:560px){body{padding:12px}.panel{padding:13px}.inputs{grid-template-columns:1fr}.tick{font-size:10px}}
+ .center-img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+  }
+.subscribe-btn {
+  display: inline-block;
+  padding: 10px 16px;
+  margin: 5px;
+  border-radius: 8px;
+  background: #333;
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+}
+</style>
+
+<link rel="icon" href="https://www.google.com/s2/favicons?domain=www.stalker-game.com&sz=64">
+</head>
+<body>
+<main>
+<img src="https://www.google.com/s2/favicons?domain=stalker-game.com&sz=128" alt="Вдалого полювання, сталкере!" class="center-img" title="Вдалого полювання, сталкере!">
+<h1>Калькулятор збирача інформації</h1>
+
+<div>Вітаю, сталкере! Якщо ви з тих, хто досі обмінює купони на можливість зібрати всі доступні файли архіву НДІЧАЗ (електронну версію), тоді цей інструмент стане вам в пригоді.
+<br><br>
+Вкажіть, які картки в вас є і який ваш бюджет, А система оцінить ваші шанси зібрати повну колекцію.
+</div>
+<br>
+
+<section class="panel">
+<h2>Вже зібрано:</h2>
+<div class="sliders">
+<div class="slider-row"><div><label for="leg">Легендарні (3%)</label><input id="leg" class="legendary" type="range" min="0" max="7" value="0"></div><div class="count" id="legCount">0 / 7</div></div>
+<div class="slider-row"><div><label for="epi">Епічні (10%)</label><input id="epi" class="epic" type="range" min="0" max="10" value="0"></div><div class="count" id="epiCount">0 / 10</div></div>
+<div class="slider-row"><div><label for="rare">Рідкісні (20%)</label><input id="rare" class="rare" type="range" min="0" max="13" value="0"></div><div class="count" id="rareCount">0 / 13</div></div>
+<div class="slider-row"><div><label for="common">Звичайні (67%)</label><input id="common" class="common" type="range" min="0" max="18" value="0"></div><div class="count" id="commonCount">0 / 18</div></div>
+</div>
+
+<br>
+<p class="hint">В дужках вказана ймовірність випадіння</p>
+<div id="collected" style="margin-top: 12px;">Зібрано: 0 / 48</div>
+</section>
+
+<section class="panel">
+<h2>Розцінки:</h2>
+<div class="inputs">
+<label class="field">Ваш бюджет
+<input id="budget" type="number" min="0" step="1" inputmode="numeric" placeholder="Введіть кількість купонів">
+</label>
+<label class="field">Ціна купівлі
+<input id="buy" type="number" min="1" step="1" inputmode="numeric" value="20">
+</label>
+<label class="field">Продаж дубліката
+<input id="sell" type="number" min="0" step="1" inputmode="numeric" value="5">
+</label>
+</div>
+<p class="hint">Після кожної купівлі новий предмет залишається в колекції, а дублікат продається. Отримана сума з продажу повторно вкладається в нову купівлю</p>
+</section>
+
+
+
+<section class="panel">
+<h2>Ймовірність зібрати повну колекцію</h2>
+<p class="stats" id="selectedInfo">Куплено штук: 0 · Ймовірність: 0%</p>
+<div class="graph-wrap">
+<svg id="chart" viewBox="0 0 760 350" role="img" aria-label="Графік імовірності завершення колекції залежно від кількості купівель">
+<g id="plot"></g>
+</svg>
+</div>
+<div class="small">Перетягуйте вертикальну лінію на графіку, щоб змінити кількість покупок. Бюджет перераховується автоматично.</div>
+<p class="stats" id="meanInfo">Середня кількість купівель до повної колекції: —</p>
+<button id="meanButton" type="button">Розрахувати по середньому значенню</button>
+
+</section>
+
+<section class="panel">
+<h2>Інформація</h2>
+<p class="hint">Оцінка побудована методом Монте-Карло (6000 симуляцій). Після завершення колекції калькулятор продовжує враховувати наступні купівлі та продаж дублікатів.<br><br>
+
+Автор: аспірант Григорук Е.П. <s>— співробітник НТЦ «Малахіт»</s><br><br>
+<b>УВАГА! НДІЧАЗ немає жодного стосунку до розробки представленого інструменту</b>
+</p><br>
+<h2>Корисні джерела:</h2>
+<a href="https://stalker.wiki/@e.gregor" target="_blank" rel="noopener noreferrer" class="subscribe-btn">
+  Кабінет асп. Григорука*
+</a><br>
+<a href="https://www.youtube.com/@EmilGregor?sub_confirmation=1" target="_blank" rel="noopener noreferrer" class="subscribe-btn">
+  YouTube
+</a><br>
+<a href="https://t.me/EmilGregorChannel" target="_blank" rel="noopener noreferrer" class="subscribe-btn">
+  Telegram
+</a><br>
+
+<div class="small">*Заходьте, реєструйтесь, додавайтесь в друзі. При реєстрації в полі «Хто тебе запросив?» вкажіть <b>E.Gregor</b></div>
+
+
+</section>
+
+
+<!-- Пасхалка -->
+<button id="eggTrigger" type="button" aria-label="Пасхалка">🥚</button>
+
+<div id="eggOverlay">
+  <canvas id="eggCanvas" width="80" height="98"></canvas>
+</div>
+
+<style>
+  #eggOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    display: grid;
+    place-items: center;
+    background: rgba(0, 0, 0, .55);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .2s ease, visibility .2s;
+  }
+
+  #eggOverlay.show {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  #eggCanvas {
+    width: min(78vw, 440px);
+    max-height: 78vh;
+    height: auto;
+    image-rendering: pixelated;
+    transform: scale(.85);
+    transition: transform .2s ease;
+  }
+
+  #eggOverlay.show #eggCanvas {
+    transform: scale(1);
+  }
+</style>
+
+<script>
+(() => {
+  const trigger = document.getElementById('eggTrigger');
+  const overlay = document.getElementById('eggOverlay');
+  const canvas = document.getElementById('eggCanvas');
+  const ctx = canvas.getContext('2d');
+
+  // Палітра кольорів
+  const palette = [
+    '#00000000',
+    '#efd3cb','#d98879','#b19b8f','#b48174','#cb7a6d',
+    '#c57367','#957463','#bb6a5f','#b6635a','#986253',
+    '#73614f','#715c4a','#6a5f53','#a6544e','#954e46',
+    '#6e5a48','#6b5848','#6c5344','#665547','#615042',
+    '#5b4d41','#544d47','#92443f','#8b3d39','#753d35',
+    '#77302d','#662723','#53463c','#524338','#4c433d',
+    '#4a403a','#4c3e36','#4c332c','#44403d','#453d3a',
+    '#443c39','#413a37','#3f3733','#40332d','#383332',
+    '#392d2a','#372723','#2e2827','#2a2321','#581a17',
+    '#3d1412','#291e1b','#291412','#201a19','#1e1614',
+    '#1c1311','#1c0c0b','#151111','#150d0c','#130b0a',
+    '#100706','#0b0605','#0c0303','#0a0202','#050202',
+    '#050000','#000101','#000000'
+  ];
+
+  // Піксельна матриця 80 × 98
+  const pixels = `
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_AAAAABAo12222rABAAAAA___AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAi_ABBy4333xgdddhz3323rBBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_AAWx5zddcdcT
+LVRMcdccpz3xDBB_i_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA__Aio42dcQRVVRTRTRVeTQQMcdz32yAAAW_
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAW2ysdTUfjjcURQMMRcckeUMLVgsvolDAA_AAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAHWABi1zTUfjjjjjjlVQQQMMQcjkVQMMRHg3oeNAtAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+A_AAilxxTTjkjjfefjkVRMQQQQRejkVTRRLHpyyoN__AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAANNx2UMTfkjjeVQcljU
+RTQQQQcfjjjjUTRTHHcyri__AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA__OHz12cMQekjjcRRQcljfffURQQRRejjjjjURRHHc
+xWDiAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_BWz9gUMRejjfTRQRQckjjjjfjTRQMQekkkjefUQHHgyoAtAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAA_AHx4dQMTejjjfUTQQRRRVfjjkeceVUURRcefjjfVQLHvoD_HAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAt_l1
+6VMQTfjjjjjkfTTQQRRcjffUTLUjkcUTQekjjjVTHLxiAA_AAAAAAAAAAAAAAAAAAAAAAAAAAAAA0_o4vRQTfjijffjjeeVQSMLL
+LLLLLLLLLVWMMckkjjjVRHg1rNWHAAAAAAAAAAAAAAAAAAAAAAAAAAA__As3RMTfjjjeTReeQMLLLcyyxrolm5_NHHHHLMVefjkl
+UQMx8lAoAAAAAAAAAAAAAAAAAAAAAAAAAA__Ar3hRQejjjeTQQQQRHp31300044063023324NHHHLMVfeVTTqrNA_AAAAAAAAAAA
+AAAAAAAAAAAAA__Br3zRQRfjjfRQRRLLv2467uaPPYbXbbau46462223LHHLTfkULx1m__AAAAAAAAAAAAAAAAAAAAAAA_AA2vTQ
+RejkkUQRHx234ttbbbutXJPbutOOYYbtt0993z2LHLjjTVzpA_AAAAAAAAAAAAAAAAAAAAAA__i14cMQckjUTSLHr-6utaOJYYYa
+tbXGYOFCattYOZbab4_xsLLffTv1r__AAAAAAAAAAAAAAAAAAAAA_AN2hQQckkVSQHpv6wtaOGFCOIOXIbtOGCFZbPIJXaYYYtu6
+_vUHdeVzsA_AAAAAAAAAAAAAAAAAAAAH_ex3RRckkVRHLg4_wbXJFIGCGCFXCGPbXObYICFXOIIPOabt4_zLLiczxl__AAAAAAAA
+AAAAAAAAAAAWAo2hTclkVQLdz_6ubXOPhuuZFIFGOFCIaaOCCIXOCCCFFJYau49zHLkgzpA_AAAAAAAAAAAAAAAAAAAWAizQRjjT
+THg996wtXPu3_186wXJFOGOCZPCCCPJCCCJJOIOab087zHLTy1o__AAAAAAAAAAAAAAAAAW_lxdTefTRHn777wttPa98sDs3_zYI
+ICPJbOJFFFCGOhwwwbOPau469mHUg2oA_AAAAAAAAAAAAAAAAAu_rzLRkVLHp6700ubabw74xDN3490YGGYaYYXGFCGbw75594tJ
+Xt4764cLWsxs__AAAAAAAAAAAAAAAA_AoyRcVQQp977utubYb4537224449wqbaOGJaOIJb7_yHW357ZOtu477zHNc27__AAAAAA
+AAAAAAAAA__ix3RVHRs9668ubuYXP46rsy73s36_0bJCJFJabt477yDe348tawt3859qLLyrA_AAAAAAAAAAAAAAA_Ax2nMHVs76
+670utbOYOZ9xoioor84ZOJICXOJab49615571y4ubtuw475_VHpxoHA_AAAAAAAAAAAAA__xvLLc49667wtwtYGOXFZ_1rrx_0YO
+YOXGIOXYYb49xosvoo8tYbwu0866xLLx5BA_AAAAAAAAAAAAA_AyxLL975666tbwuYJFYPFZu46wZIOtFOOCCCGXbOP25rieo10X
+OXtu07669dHc2AA_AAAAAAAAAAAA__isvHR566677tattbOFOPXFCCCCCOubGOICCCIPOaFJu__2_0PJOIat07666xLMxxNA_AAA
+AAAAAAAA_A11dHq666606tYtPtaIGOOYPOOJataPXttOGGObYbZCIKMtZJOPPGYb076669sTg5kA_AAAAAAAAAAA__8zLHz9676u
+4watGOuaIJJPOattbPFCOXtubattXOtYCFIJOOYJPGYau776659cT4iA_AAAAAAAAAAA_A1ydLxy574tu6aaOCOtbJXOObbaYZXP
+CCGPbaaYJFXtYIGCOOOOJPaYtw47668cU4iA_AAAAAAAAAA_BBBoyUcs7660tuuYaJCIubJYabtw4hZKbSPJICCJJJIPtaGJIJOY
+GbPPtt07669cU5DA_AAAAAAAA_ANx5yHrvLdx677bb0tYYGCJtaIatuu0KFCZEqhhvZJGGIJPttXFOaJXaIOut08661gU2pB_AAA
+AAAA__y2wZZsHoqLfy76wbt0uaOFFObPObOYOZtKHv2CK55w0hbOIJabXYOPbJIabb0866xsTU3DA_AAAAAA_A50ICCY1NynVgz9
+7ubbutaIOGPbGYPOOOIPhv0KPFU_dFZ9tXOabPOYOGOtat4767xsVhxDA_AAAAAA_W_wCCCJvWNysUk179uaYbbaXOCYOOYFJXJG
+GFJZZabhZPbttbXbYIbJCJata09673vnV7BA_AAAAAAH_A-wJFFIbxADxsgkz29ubPOaaYJOYFYPFCJXYOGFCJGCOYOPPGPaIXaJ
+OYtaa0863vrTU5_A_AAAAA_ANW14YJGOayB_Bz2dcmv59aPGCataXFGYOCFFCOPXOJPPIIPOIJaYYIXYataYt384vseTmynA_AAA
+AAANowwwtZOObxAAWW44cVUfy7aPFCObtPFJXJCCCCCJXGOXPXIGIXJCCOaaaOPa094vsnTqyBA_AAAAHDNywOCGbttabyWiz366
+54rUTn4bPGCGYbaPIXICCCGCJCCOGFFOPGCFOtYOOPw656vqlTyxDAHAAAAA_W1tFCCCCFGYu438sVVVp765VRs3tYOCGIObtZOJ
+FCCGGFCGGIOGCGIauYaPOu862vvVLy1DA_AAAAAAANzICIGCCCJIYu2VcnTLRm2x2UQz7waPFCGGYatbPOJIIFGOJIGJObbaOGIY
+u692sgMTxyWA_AAAAAAANrwICJaXIIJIPu4gMgpVMMgmvqQg2yuaXICCGJYbttaaZaaaYYabbYOOOOYu_5ykUVnxxoA_AAAAAAAA
+H2aGCFXZbaaZaw3pgLhscMMnm2qLkozubaOGCCFIPYYbbbbbbZYOIFGOPa0_znUgnrxxBA_AAAAAAAAAoqJCCCCCZZbuuwyMnVMp
+rVQgrs6UNmpybYaXJFCCCCCJJJJJGCCFGGOPZw9wecd3_2DA__AAAAAAAAAA2aOCCCCCCCOZwb4ULqQMqmVMqox9HLoryXJXbPIG
+CCFCCCCCCFFJOPXaw72UU492yliWA_AAAAAAAAAA3aXFFOGCFIOXwt_pLpVMpneTholyLHlom5hFIYtXIGFCFFFFJOOXXbtta0mT
+z7vomx4rN__AAAAAAAAAstXJFXaPPPPZ0u_nHjsMpgfThoem4LLpkTsqJFOabYPIGGOPYbtttbYYZ0ce3xoooly2oi_AAAAAAAAA
+HzYPGCGtttu0u5_nHUqQpdcUnpRk7yHgreMn5bXOJXbtttttttaYYYYZ0sUnvoooooVn1iB_AAAAAAAANxtXOCCFGPY0u78nLUsR
+pdVmsmTjs7rHmlcQh4ZOYXYYttYYYXOFIPXw8LWscjooromVpymAWAAAAAAADizXPOIOOOY6491LQmsTsgVr3lQqmrsHRklVL1PC
+GGYbtaaaYJFCFFX0RTloyrlmxpoUe2l_tAAAAAAAAW1wYPOPPb067zULRrlfzlfz2gezVR3nHckjTvtJJXJIYaOIPYOFCChdLeoT
+yrel2rllUUviAWAAAAAAHHi1wwwww086_vLRpmfrxim4sjr4TMr7gHToUR2ZGIJObaOJIGGJJZ6NToWqrmjx4plrlMVsoWtAAAAA
+_AAWl59__9_3gVMfrlkzroy5pmzscRRp9UHTeRVqPJattttYJIFFJwmUjoNxrVf2vmspmfLyrAuAAAAAAA_ADs6zxsngLRnsojx6
+xy66xy6rlcMQpycERgRrwtbYXPabbXOIZpTjmVnpcMq1ossmosgysH0_AAAAAAAsAWxzseTTlqrljr777976973xomURLVvnLVlV
+xtOFPICGabbb0UcmecycLRzyp3po2vncv1AA_AAAAAAA_oBr334xvpopy423xx6655pmsvmfUMLn5RTmRvaIXXGCCJb4ccljVzdM
+Ul3y2vr2vUMcksrD__AAAAAAAAAeWr3544462WWeAr4xxxvmmmcllcMQSvnTlTwbXGPPFOwcVmUvzdRQfs44636gTQWrkl1HA_AA
+AAAAAA_AApsvsssvpAAAAx4vomvvlkUTcleRMUqgHVLvbOJGOwdUlTqvcQRcmv4769hQcmz5yz1BB_AAAAAAAAAA_AAAAAAAA_Wi
+Hor2xkkpsocQRUcjULSnxTLNvaGJudLTvysVQRcmms466vecx5ndddgviA_AAAAAAAAAA_______iAAAHADz41eTdrmeVMRURVfh
+xqqHLwtugNcqyrUQMVlooy667ov26nLLVVg4N_tAAAAAAAAAAAAAAAAAAAAAA_A1xrycLdorlVQMMUcVLVdnLc7vTgvxgRMMVjom
+Vy556z6ypTVpxrlsrAA_AAAAAAAAAAAAAAAAAAAA_DozpTqxcLcdcVMMMMUlndTpmnnHUssfMMVclofVUyos69zljsssphefzrD_
+AAAAAAAAAAAAAAAAAAAA_AxymVLvynTLMTVUTMVfpvpoyyHHLhjQMMVfceRTmzlBx3oryyveUVjcg2DAAAAAAAAAAAAAAAAAAAAA
+_BxrcmVjyzscTTjmlcTMVgpq4RKdSMgUUUTMMLTlv2lAr1x3ylWTVdomg5NAAAAAAAAAAAAAAAAAAAAAAA1nLjpmijsrlVVerrpV
+QLLe3LVcnSsromlULcnvv2lNs56soonpx353yrH_AAAAAAAAAAAAAAAAAA_ANy4VMUpsqmjfVVUTjprplnqr4SMpShdTTRRMVsxx
+kmzrW3ymx4_tbbab9rA_AAAAAAAAAAAAAAAAAA__W3vQMQUnxrqpcVQRTccmorgd2pSSgpccccggpsgVVj21Nmzz7tXJGIOJbwvB
+AAAAAAAAAAAAAAAAAA_AB3dMcTMVdpvvrpcUQMMUUUMLznryrklmmprsgcRLgo21AA1_uOFJJCJJGb1BAAAAAAAAAAAAAAAAA__N
+xzSQjcTQMVggmmkfVcdccccc2mUSQmlkccccRLVgsozrArkytGFZbIFOIOyDAAAAAAAAAAAAAAAAA_Ar3dMQemfRRRMHHMTTfrss
+svol3pHMKVroTLLLMepssmmvNDAsuFCa4YCIYFZxAAAAAAAAAAAAAAAAA_AW3UMckjjffffLMLHHLRVVUTUc2SVghKgVMmqpnrsp
+mkjpvm_xuOFhsuPJJOP1AAAAAAAAAAAAAAAA__DrnQMfljllVVVTSMLLTcTLTgTp5MgpdSpVMcdqxvpleklj1oAxwOJwo3tOGXY1
+AAAAAAAAAAAAAAAA_Ar4QMVjjkcVQMMMRVccfccmpknp4ULdMnrrfQLVdmlnppmkzsWivttrW10IFXt1AAAAAAAAAAAAAAAABH1q
+RUjklcRQQQVVckklVUppgVnTysUUqsklmcVTQVkpssolr3oAixsAAxqCIYwoAAAAAAAAAAAAAA_ABzzMQkleeTMQMQefekfccjgT
+TpRU299gcrrVfkkkgVVfrsrmjzeAAAAHWqOIPa1BAAAAAAAAAAAAAA_AA3rRRefTLTVUMQQMTfVTeTQkpTT3947gLcqplVQQQQQe
+rssojxrHAx_WwXIXYuxDAAAAAAAAAAAAA_ABsvVMQUTsyzVLTSRRQRclVQmlRdy24767gLUpplcTTRQcprrrmkzsoiANxuba01BA
+AAAAAAAAAAAAA_ABxTLTpz3797cULLLLRTTQfrcLx2lHs1665dMfrsrqpUMTUjnorkez1A_NNoz3xDA_AAAAAAAAAAAAA_ABsqpy
+3Wy756__dVsyqHHVUTRv7rDAHW4665dQfscLRMLv41zrfff22A_AAEeiWA_AAAAAAAAAAAAAAA_DNy1NWDywv3449_992ppcTq37
+57AvAA37664dRTnvvvv65oNs212zs__A_AAAA_AAAAAAAAAAAAAAAAA_ABWAAxyppnnhq2667_95577xyyA__D266794224_9766
+3iAioorNAAAAA____AAAAAAAAAAAAAAAAAAAHAA_Bsyvz20zggq3544566xNAAA_Az0x2330yz44qhhq3oNAAAAA_AAAAAAAAAAA
+AAAAAAAAAAAAAAAAA___AB13qnvz40hhv7zy44rA__A__pz0vxqnv3vhq04422eBWH__AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_A
+y3qnhhUUhv40qy6464r__AAA_Ar65534zppzzqppqyzrA_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA172z34zwddhq2sz96sW_
+tAAA__Hyyw7sdv5qScv2244oBBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA_ANz6vphdpqq2zddv3vx4sA_AAAA_AAxvvqdw0dSq2vh
+dqqxzrA__AAAAAAAAAAAAAAAAAAAAAAAAA__D13ddUSSdhUUpv2yhw2q51o__AAA_Arzvqgv5cSwqdcSShnqvyzoA_AAAAAAAAAA
+AAAAAAAAAAAAA_AAsqdMHHHLSUSShhqzwnyv461A_AAA_A1zvnv9hh0pSSHHMUgdVhvsHBHAAAAAAAAAAAAAAAAAAAAAA_NWvUSS
+KHHSSSSShhhv2wx365rD_AAA_Bx4yq2whsvVSSKHMSUdSchvxoA_AAAAAAAAAAAAAAAAAAAA_AW3zdgSSSUdgVUUnpqy06z3zyzs
+A_A_Arxzz26wvwqhSSSSSSghdhnv7xA_AAAAAAAAAAAAAAAAAAAA_Ai3yqnhddphdqqqyyx23wqssw71A_A_A4znvvwz2zvvnhhh
+gnqvvyx24sA_AAAAAAAAAAAAAAAAAAAA_AozSUqvsvvvvvvv43qnnpwywxxsA_A_Arvvzphhhhw32vvvvvvz33zpz1A_AAAAAAAA
+AAAAAAAAAAAA_Ai3qSMLHHLMMSSgpnpqqvyyxiBWAAAAAA_BoxysqqqnhgSSSSSSSSgnhp21A_AAAAAAAAAAAAAAAAAAAA_Ai33nhh
+hhdddnqqssv453WBBAAAAAAAAAABH2554xvqhdddggggqqqv4rA_AAAAAAAAAAAAAAAAAAAAAA_Ai5877777877757xAAAAAAA_A
+AAAAAAAAAAAAAv85778777777671A_AAAAAAAAAA
+  `;
+
+  const alphabet =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+
+  const imageData = ctx.createImageData(80, 98);
+
+  for (let i = 0; i < 80 * 98; i++) {
+    const colorIndex = alphabet.indexOf(pixels.replace(/\s/g, '')[i]);
+    if (colorIndex <= 0) continue;
+
+    const color = palette[colorIndex];
+    const offset = i * 4;
+
+    imageData.data[offset] = parseInt(color.slice(1, 3), 16);
+    imageData.data[offset + 1] = parseInt(color.slice(3, 5), 16);
+    imageData.data[offset + 2] = parseInt(color.slice(5, 7), 16);
+    imageData.data[offset + 3] = 255;
+  }
+
+  ctx.putImageData(imageData, 0, 0);
+
+  let timer;
+
+  trigger.addEventListener('click', () => {
+    clearTimeout(timer);
+    overlay.classList.add('show');
+
+    timer = setTimeout(() => {
+      overlay.classList.remove('show');
+    }, 5000);
+  });
+})();
+</script>
+
+
+
+</main>
+<script>
+(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+const categoryDefs = [
+  {id:'leg', count:'legCount', total:7, p:.03},
+  {id:'epi', count:'epiCount', total:10, p:.10},
+  {id:'rare', count:'rareCount', total:13, p:.20},
+  {id:'common', count:'commonCount', total:18, p:.67}
+];
+const TRIALS = 6000;
+let trials = [];
+let completionSorted = [];
+let meanCompletion = 0;
+let selectedN = 0;
+let graphMax = 100;
+let valid = false;
+const chart = $('chart'), plot = $('plot');
+const W=760,H=350,L=54,R=18,T=18,B=48;
+const pw=W-L-R, ph=H-T-B;
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const intValue = el => {
+  const v = Number(el.value);
+  return Number.isFinite(v) ? Math.trunc(v) : NaN;
+};
+function settings(){
+  const buy=intValue($('buy')), sell=intValue($('sell'));
+  const budgetText=$('budget').value.trim();
+  const budget=budgetText==='' ? null : intValue($('budget'));
+  return {buy,sell,budget,budgetText};
+}
+function collected(){
+  return categoryDefs.map(c=>clamp(intValue($(c.id)),0,c.total));
+}
+function simulate(){
+  const have=collected();
+  const {buy,sell}=settings();
+  if(!Number.isInteger(buy)||buy<=0||!Number.isInteger(sell)||sell<0||sell>=buy){
+    valid=false; trials=[]; completionSorted=[]; renderInvalid(); return;
+  }
+  valid=true;
+  trials=[];
+  completionSorted=[];
+  const netDuplicate=buy-sell;
+  for(let t=0;t<TRIALS;t++){
+    const missing=categoryDefs.map((c,i)=>c.total-have[i]);
+    let left=missing.reduce((a,b)=>a+b,0);
+    let cashSpent=0;
+    const thresholds=[];
+    let draws=0;
+    while(left>0 && draws<10000){
+      const r=Math.random();
+      let category;
+      if(r<.03) category=0;
+      else if(r<.13) category=1;
+      else if(r<.33) category=2;
+      else category=3;
+      const def=categoryDefs[category];
+      const isNew=missing[category]>0 && Math.random()<missing[category]/def.total;
+      draws++;
+      thresholds.push(cashSpent+buy);
+      if(isNew){missing[category]--;left--;cashSpent+=buy;}
+      else cashSpent+=netDuplicate;
+    }
+    const completionBudget=thresholds.length ? thresholds[thresholds.length-1] : 0;
+    trials.push({thresholds,draws,completionBudget});
+    completionSorted.push(draws);
+  }
+  completionSorted.sort((a,b)=>a-b);
+  meanCompletion=completionSorted.reduce((a,b)=>a+b,0)/TRIALS;
+  updateCountLabels();
+  const currentBudget=settings().budget;
+  selectedN=(currentBudget!==null && Number.isFinite(currentBudget) && currentBudget>=0)
+    ? averageAffordable(currentBudget) : 0;
+  render();
+}
+function updateCountLabels(){
+  let currentTotal = 0;
+  let maxTotal = 0;
+
+  categoryDefs.forEach(c => {
+    const val = Number($(c.id).value);
+    $(c.count).textContent = `${val} / ${c.total}`;
+    currentTotal += val;
+    maxTotal += c.total;
+  });
+
+  $('collected').textContent = `Зібрано: ${currentTotal} / ${maxTotal}`;
+}
+function requiredBudget(n){
+  const {buy, sell} = settings();
+  if(n <= 0) return 0;
+
+  let total = 0;
+  for(const tr of trials){
+    if(n <= tr.draws) total += tr.thresholds[n-1];
+    else total += tr.completionBudget + buy + (n - tr.draws - 1) * (buy - sell);
+  }
+  const avg = total / TRIALS;
+
+  // Базовий бюджет (якщо всі спроби — дублікати)
+  const base = buy + (n - 1) * (buy - sell);
+  if (sell <= 0 || avg <= base) return base;
+
+  // Максимальна кількість нових карток, яка може вплинути на бюджет за n спроб
+  const remaining = collected().reduce((sum, val, i) => sum + (categoryDefs[i].total - val), 0);
+  const maxNewAffectingBudget = Math.min(remaining, n - 1);
+
+  // Знаходимо цілу кількість нових карток k (із заокругленням догори)
+  const k = Math.min(maxNewAffectingBudget, Math.ceil((avg - base) / sell));
+
+  return base + k * sell;
+}
+function affordableForTrial(tr,budget){
+  let lo=0,hi=tr.thresholds.length;
+  while(lo<hi){
+    const mid=(lo+hi)>>1;
+    if(tr.thresholds[mid]<=budget)lo=mid+1;else hi=mid;
+  }
+  const before=lo;
+  if(before<tr.draws)return before;
+  const rest=budget-tr.completionBudget;
+  if(rest<settings().buy)return tr.draws;
+  return tr.draws+1+Math.floor((rest-settings().buy)/(settings().buy-settings().sell));
+}
+function averageAffordable(budget){
+  let total=0;
+  for(const tr of trials)total+=affordableForTrial(tr,budget);
+  return Math.round(total/TRIALS);
+}
+function probability(n){
+  if(n<=0)return completionSorted[0]===0?1:0;
+  let lo=0,hi=completionSorted.length;
+  while(lo<hi){const mid=(lo+hi)>>1;if(completionSorted[mid]<=n)lo=mid+1;else hi=mid;}
+  return lo/TRIALS;
+}
+function xPos(n){return L+(n/graphMax)*pw;}
+function yPos(p){return T+(1-p)*ph;}
+function renderInvalid(){
+  plot.innerHTML='';
+  $('selectedInfo').textContent='Перевірте ціни: купівля має бути більшою за нуль, а продаж дубліката — не меншим за нуль і меншим за ціну купівлі.';
+  $('meanInfo').textContent='Середня кількість купівель до повної колекції: —';
+}
+function render(){
+  if(!valid)return;
+  const meanX=Math.ceil(meanCompletion);
+  graphMax=Math.max(100,Math.ceil(meanCompletion*1.8),selectedN+20,Math.ceil(meanX*1.5));
+  graphMax=Math.min(graphMax,10000);
+  const ticks=[0,25,50,75,100];
+  let s='';
+  ticks.forEach(p=>{
+    const y=yPos(p/100);
+    s+=`<line class="gridline" x1="${L}" y1="${y}" x2="${W-R}" y2="${y}"/>`;
+    s+=`<text class="tick" x="${L-10}" y="${y+4}" text-anchor="end">${p}%</text>`;
+  });
+  const xTicks=5;
+  for(let i=0;i<=xTicks;i++){
+    const n=Math.round(graphMax*i/xTicks),x=xPos(n);
+    s+=`<line class="gridline" x1="${x}" y1="${T}" x2="${x}" y2="${H-B}"/>`;
+    s+=`<text class="tick" x="${x}" y="${H-B+19}" text-anchor="middle">${n}</text>`;
+  }
+  s+=`<line class="axis" x1="${L}" y1="${T}" x2="${L}" y2="${H-B}"/>`;
+  s+=`<line class="axis" x1="${L}" y1="${H-B}" x2="${W-R}" y2="${H-B}"/>`;
+  s+=`<text class="axis-title" x="${L+pw/2}" y="${H-8}" text-anchor="middle">Придбано штук</text>`;
+  s+=`<text class="axis-title" transform="translate(14 ${T+ph/2}) rotate(-90)" text-anchor="middle">Ймовірність</text>`;
+  let path='';
+  const samples=100;
+  for(let i=0;i<=samples;i++){
+    const n=Math.round(graphMax*i/samples);
+    const x=xPos(n),y=yPos(probability(n));
+    path+=(i===0?'M':'L')+x.toFixed(2)+' '+y.toFixed(2)+' ';
+  }
+  s+=`<path class="curve" d="${path}"/>`;
+  const mx=xPos(clamp(selectedN,0,graphMax));
+  const mp=probability(selectedN), my=yPos(mp);
+  s+=`<line class="marker" x1="${mx}" y1="${T}" x2="${mx}" y2="${H-B}"/>`;
+  s+=`<circle class="marker-dot" cx="${mx}" cy="${my}" r="5"/>`;
+  s+=`<text class="marker-label" x="${clamp(mx+7,L+4,W-R-72)}" y="${T+13}">${selectedN} шт.</text>`;
+  plot.innerHTML=s;
+  $('selectedInfo').textContent=`Придбано штук: ${selectedN} · Ймовірність: ${(mp*100).toFixed(1)}%`;
+ $('meanInfo').innerHTML = `Треба придбати для завершення колекції (середнє значення): <b>${Math.ceil(meanCompletion)} шт.</b>`;
+}
+function setBudgetForSelection(n){
+  const target=clamp(Math.round(n),0,10000);
+  const amount=requiredBudget(target);
+  $('budget').value=String(amount);
+  selectedN=target;
+  render();
+}
+function graphNFromEvent(e){
+  const rect=chart.getBoundingClientRect();
+  const x=(e.clientX-rect.left)*(W/rect.width);
+  return clamp(Math.round((x-L)/pw*graphMax),0,graphMax);
+}
+let dragging=false;
+chart.addEventListener('pointerdown',e=>{
+  if(!valid)return;
+  dragging=true;
+  chart.setPointerCapture(e.pointerId);
+  setBudgetForSelection(graphNFromEvent(e));
+  e.preventDefault();
+});
+chart.addEventListener('pointermove',e=>{
+  if(!dragging)return;
+  setBudgetForSelection(graphNFromEvent(e));
+});
+chart.addEventListener('pointerup',()=>{dragging=false;});
+chart.addEventListener('pointercancel',()=>{dragging=false;});
+$('budget').addEventListener('input',()=>{
+  if(!valid)return;
+  const {budget,budgetText}=settings();
+  if(budgetText===''||!Number.isFinite(budget)||budget<0){selectedN=0;render();return;}
+  selectedN=averageAffordable(budget);render();
+});
+$('buy').addEventListener('change',simulate);
+$('sell').addEventListener('change',simulate);
+categoryDefs.forEach(c=>$(c.id).addEventListener('input',()=>{
+  updateCountLabels();simulate();
+}));
+$('meanButton').addEventListener('click',()=>{
+  if(!valid)return;
+  setBudgetForSelection(Math.ceil(meanCompletion));
+});
+updateCountLabels();
+simulate();
+})();
+</script>
+
+</body>
+</html>
