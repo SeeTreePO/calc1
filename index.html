@@ -548,6 +548,30 @@ $('meanButton').addEventListener('click',()=>{
 });
 updateCountLabels();
 simulate();
+if (window.Telegram && Telegram.WebApp) {
+  Telegram.WebApp.ready();
+
+  const initData = Telegram.WebApp.initData;
+
+  if (initData) {
+    fetch(
+      'https://script.google.com/macros/s/AKfycbykUw39PyzPvtFjVZiCZ0lJdIujFQjlDq5iwCSZhoo80AkXrVX5uRXxBQXBiN7-ZZ5B/exec',
+      {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8'
+        },
+        body: JSON.stringify({
+          type: 'app_open',
+          initData: initData
+        })
+      }
+    );
+  }
+}
+
+ 
 })();
 </script>
 
