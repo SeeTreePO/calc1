@@ -54,6 +54,32 @@ button:active{transform:translateY(1px)}
   text-decoration: none;
   font-weight: bold;
 }
+hr {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin: 16px 0;
+}
+details {
+  background: var(--panel2);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-top: 10px;
+}
+
+summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--accent);
+  user-select: none; /* Щоб текст заголовка не виділявся синім при швидких кліках */
+}
+
+details[open] summary {
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 8px;
+}
+
 </style>
 
 <link rel="icon" href="https://www.google.com/s2/favicons?domain=www.stalker-game.com&sz=64">
@@ -72,6 +98,8 @@ button:active{transform:translateY(1px)}
 
 <section class="panel">
 <h2>Вже зібрано:</h2>
+<p class="hint">В дужках вказана ймовірність випадіння</p> 
+<br>
 <div class="sliders">
 <div class="slider-row"><div><label for="leg">Легендарні (3%)</label><input id="leg" class="legendary" type="range" min="0" max="7" value="0"></div><div class="count" id="legCount">0 / 7</div></div>
 <div class="slider-row"><div><label for="epi">Епічні (10%)</label><input id="epi" class="epic" type="range" min="0" max="10" value="0"></div><div class="count" id="epiCount">0 / 10</div></div>
@@ -79,31 +107,37 @@ button:active{transform:translateY(1px)}
 <div class="slider-row"><div><label for="common">Звичайні (67%)</label><input id="common" class="common" type="range" min="0" max="18" value="0"></div><div class="count" id="commonCount">0 / 18</div></div>
 </div>
 
-<br>
-<p class="hint">В дужках вказана ймовірність випадіння</p>
+
+
 <div id="collected" style="margin-top: 12px;">Зібрано: 0 / 48</div>
 </section>
 
 <section class="panel">
-<h2>Розцінки:</h2>
+<h2>Бюджет:</h2>
 <div class="inputs">
-<label class="field">Ваш бюджет
+<!-- <label class="field">Ваш бюджет -->
 <input id="budget" type="number" min="0" step="1" inputmode="numeric" placeholder="Введіть кількість купонів">
+
 </label>
+<!-- ТИМЧАСОВО ПРИХОВАНІ ПОЛЯ ЦІН (розкоментуйте блок нижче, щоб повернути ручне введення)
 <label class="field">Ціна купівлі
 <input id="buy" type="number" min="1" step="1" inputmode="numeric" value="20">
 </label>
 <label class="field">Продаж дубліката
 <input id="sell" type="number" min="0" step="1" inputmode="numeric" value="5">
 </label>
+-->
 </div>
-<p class="hint">Після кожної купівлі новий предмет залишається в колекції, а дублікат продається. Отримана сума з продажу повторно вкладається в нову купівлю</p>
+<p class="hint">Купівля - 20 купонів. Продаж дубліката - 5 купонів.</p>
 </section>
 
 
 
+
 <section class="panel">
-<h2>Ймовірність зібрати повну колекцію</h2>
+<h2>Ймовірність зібрати повну колекцію*</h2>
+<p class="hint">*За умови, що ви кожного разу продаєте дублікати, а отримані гроші вкладаєте в нову покупку</p>
+
 <p class="stats" id="selectedInfo">Куплено штук: 0 · Ймовірність: 0%</p>
 <div class="graph-wrap">
 <svg id="chart" viewBox="0 0 760 350" role="img" aria-label="Графік імовірності завершення колекції залежно від кількості купівель">
@@ -111,8 +145,10 @@ button:active{transform:translateY(1px)}
 </svg>
 </div>
 <div class="small">Перетягуйте вертикальну лінію на графіку, щоб змінити кількість покупок. Бюджет перераховується автоматично.</div>
-<p class="stats" id="meanInfo">Середня кількість купівель до повної колекції: —</p>
-<button id="meanButton" type="button">Розрахувати по середньому значенню</button>
+<br>
+<h2>Прогнозована кількість покупок</h2>
+<p class="stats" id="newItemInfo">До отримання нової картки: —</p>
+<p class="stats" id="meanInfo">До завершення колекції: —</p>
 
 </section>
 
@@ -135,6 +171,20 @@ button:active{transform:translateY(1px)}
 </a><br>
 
 <div class="small">*Заходьте, реєструйтесь, додавайтесь в друзі. При реєстрації в полі «Хто тебе запросив?» вкажіть <b>E.Gregor</b></div>
+<hr>
+<details>
+  <summary><b>v1.1</b></summary>
+  <p><b>v1.1</b>
+    <ul>
+    <li>Прибрана кнопка розрахунку бюджету за середнім значенням (дані відображаються в дужках)</li>
+    <li>Прибрані зайві поля: ціна купівлі, ціна продажу</li>
+    <li>Доданий прозноз отримати новий предмет: кількість покупок і необхідний бюджет</li>
+    <li>Дрібні виправлення тексту</li>
+    </ul>
+  </p>
+  <p><b>v1.0 </b>Базовий функціонал</p>
+</details>
+
 
 
 </section>
@@ -326,6 +376,13 @@ AAAAAAAAAAAAAv85778777777671A_AAAAAAAAAA
 <script>
 (() => {
 'use strict';
+// =========================================================
+// ФІКСОВАНІ ЦІНИ (змінити за потреби)
+// =========================================================
+const DEFAULT_BUY = 20;   // Ціна купівлі
+const DEFAULT_SELL = 5;   // Ціна продажу дубліката
+// =========================================================
+
 const $ = id => document.getElementById(id);
 const categoryDefs = [
   {id:'leg', count:'legCount', total:7, p:.03},
@@ -349,10 +406,12 @@ const intValue = el => {
   return Number.isFinite(v) ? Math.trunc(v) : NaN;
 };
 function settings(){
-  const buy=intValue($('buy')), sell=intValue($('sell'));
-  const budgetText=$('budget').value.trim();
-  const budget=budgetText==='' ? null : intValue($('budget'));
-  return {buy,sell,budget,budgetText};
+  const buyEl = $('buy'), sellEl = $('sell');
+  const buy = buyEl ? intValue(buyEl) : DEFAULT_BUY;
+  const sell = sellEl ? intValue(sellEl) : DEFAULT_SELL;
+  const budgetText = $('budget').value.trim();
+  const budget = budgetText === '' ? null : intValue($('budget'));
+  return {buy, sell, budget, budgetText};
 }
 function collected(){
   return categoryDefs.map(c=>clamp(intValue($(c.id)),0,c.total));
@@ -366,6 +425,8 @@ function simulate(){
   valid=true;
   trials=[];
   completionSorted=[];
+  let newItemDrawSum = 0;
+  let newItemSamples = 0;
   const netDuplicate=buy-sell;
   for(let t=0;t<TRIALS;t++){
     const missing=categoryDefs.map((c,i)=>c.total-have[i]);
@@ -373,6 +434,7 @@ function simulate(){
     let cashSpent=0;
     const thresholds=[];
     let draws=0;
+    let firstNewDraw=0;
     while(left>0 && draws<10000){
       const r=Math.random();
       let category;
@@ -384,15 +446,32 @@ function simulate(){
       const isNew=missing[category]>0 && Math.random()<missing[category]/def.total;
       draws++;
       thresholds.push(cashSpent+buy);
-      if(isNew){missing[category]--;left--;cashSpent+=buy;}
+      if(isNew){
+        if(firstNewDraw===0) firstNewDraw=draws;
+        missing[category]--;left--;cashSpent+=buy;
+      }
       else cashSpent+=netDuplicate;
     }
     const completionBudget=thresholds.length ? thresholds[thresholds.length-1] : 0;
-    trials.push({thresholds,draws,completionBudget});
+    if(firstNewDraw>0){
+      newItemDrawSum+=firstNewDraw;
+      newItemSamples++;
+    }
+    trials.push({thresholds,draws,completionBudget,firstNewDraw});
     completionSorted.push(draws);
   }
   completionSorted.sort((a,b)=>a-b);
   meanCompletion=completionSorted.reduce((a,b)=>a+b,0)/TRIALS;
+  const remainingItems=categoryDefs.reduce((sum,c,i)=>sum+c.total-have[i],0);
+  if(remainingItems===0){
+    $('newItemInfo').textContent='Ви зібрали повну колекцію. Вітаємо!';
+  }else if(newItemSamples>0){
+    const avgNewDraws=Math.ceil(newItemDrawSum/newItemSamples);
+    const avgNewBudget=buy+(avgNewDraws-1)*(buy-sell);
+    $('newItemInfo').innerHTML=`До отримання нової картки: <b>${avgNewDraws} шт.</b> (${avgNewBudget} купонів)`;
+  }else{
+    $('newItemInfo').textContent='До отримання нової картки: не вдалося оцінити';
+  }
   updateCountLabels();
   const currentBudget=settings().budget;
   selectedN=(currentBudget!==null && Number.isFinite(currentBudget) && currentBudget>=0)
@@ -463,8 +542,9 @@ function xPos(n){return L+(n/graphMax)*pw;}
 function yPos(p){return T+(1-p)*ph;}
 function renderInvalid(){
   plot.innerHTML='';
-  $('selectedInfo').textContent='Перевірте ціни: купівля має бути більшою за нуль, а продаж дубліката — не меншим за нуль і меншим за ціну купівлі.';
-  $('meanInfo').textContent='Середня кількість купівель до повної колекції: —';
+  $('selectedInfo').textContent='Перевірте ціни: ціна купівлі має бути більшою за нуль, а ціна дубліката — не меншою за нуль і меншою за ціну купівлі.';
+  $('meanInfo').textContent='До завершення колекції: —';
+  $('newItemInfo').textContent='До отримання нової картки: —';
 }
 function render(){
   if(!valid)return;
@@ -502,8 +582,10 @@ function render(){
   s+=`<circle class="marker-dot" cx="${mx}" cy="${my}" r="5"/>`;
   s+=`<text class="marker-label" x="${clamp(mx+7,L+4,W-R-72)}" y="${T+13}">${selectedN} шт.</text>`;
   plot.innerHTML=s;
-  $('selectedInfo').textContent=`Придбано штук: ${selectedN} · Ймовірність: ${(mp*100).toFixed(1)}%`;
- $('meanInfo').innerHTML = `Треба придбати для завершення колекції (середнє значення): <b>${Math.ceil(meanCompletion)} шт.</b>`;
+    $('selectedInfo').textContent=`Придбано штук: ${selectedN} · Ймовірність: ${(mp*100).toFixed(1)}%`;
+  const meanDraws = Math.ceil(meanCompletion);
+  const meanBudget = requiredBudget(meanDraws);
+  $('meanInfo').innerHTML = `До завершення колекції: <b>${meanDraws} шт.</b> (${meanBudget} купонів)`;
 }
 function setBudgetForSelection(n){
   const target=clamp(Math.round(n),0,10000);
@@ -537,15 +619,11 @@ $('budget').addEventListener('input',()=>{
   if(budgetText===''||!Number.isFinite(budget)||budget<0){selectedN=0;render();return;}
   selectedN=averageAffordable(budget);render();
 });
-$('buy').addEventListener('change',simulate);
-$('sell').addEventListener('change',simulate);
+if ($('buy')) $('buy').addEventListener('change', simulate);
+if ($('sell')) $('sell').addEventListener('change', simulate);
 categoryDefs.forEach(c=>$(c.id).addEventListener('input',()=>{
   updateCountLabels();simulate();
 }));
-$('meanButton').addEventListener('click',()=>{
-  if(!valid)return;
-  setBudgetForSelection(Math.ceil(meanCompletion));
-});
 updateCountLabels();
 simulate();
 if (window.Telegram && Telegram.WebApp) {
