@@ -496,7 +496,7 @@ function requiredBudget(n){
   const {buy, sell} = settings();
   if(n <= 0) return 0;
 
-  // Базовий бюджет (якщо всі спроби до останньої — дублікати)
+  // Базовий бюджет (якщо всі попередні спроби — дублікати)
   const base = buy + (n - 1) * (buy - sell);
   const remaining = collected().reduce((sum, val, i) => sum + (categoryDefs[i].total - val), 0);
 
@@ -511,31 +511,27 @@ function requiredBudget(n){
   const avg = total / TRIALS;
   if (avg <= base) return base;
 
-  // Максимальна кількість нових карток, яка може вплинути на бюджет за n спроб
+  // Максимальна кількість нових карток, що не продаються до n-ї спроби
   const maxNewAffectingBudget = Math.min(remaining - 1, n - 1);
-
-  // Знаходимо цілу кількість нових карток k (математичне округлення)
   const k = Math.min(maxNewAffectingBudget, Math.round((avg - base) / sell));
 
   return base + k * sell;
 }
-function affordableForTrial(tr,budget){
-  let lo=0,hi=tr.thresholds.length;
-  while(lo<hi){
-    const mid=(lo+hi)>>1;
-    if(tr.thresholds[mid]<=budget)lo=mid+1;else hi=mid;
-  }
-  const before=lo;
-  if(before<tr.draws)return before;
-  const rest=budget-tr.completionBudget;
-  if(rest<settings().buy)return tr.draws;
-  return tr.draws+1+Math.floor((rest-settings().buy)/(settings().buy-settings().sell));
-}
+
 function averageAffordable(budget){
-  let total=0;
-  for(const tr of trials)total+=affordableForTrial(tr,budget);
-  return Math.round(total/TRIALS);
+  const {buy} = settings();
+  if (!Number.isFinite(budget) || budget < buy) return 0;
+
+  let lo = 1;
+  let hi = 10000;
+  while (lo < hi) {
+    const mid = (lo + hi + 1) >> 1;
+    if (requiredBudget(mid) <= budget) lo = mid;
+    else hi = mid - 1;
+  }
+  return lo;
 }
+
 function probability(n){
   if(n<=0)return completionSorted[0]===0?1:0;
   let lo=0,hi=completionSorted.length;
