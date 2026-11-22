@@ -496,23 +496,26 @@ function requiredBudget(n){
   const {buy, sell} = settings();
   if(n <= 0) return 0;
 
+  // Базовий бюджет (якщо всі спроби до останньої — дублікати)
+  const base = buy + (n - 1) * (buy - sell);
+  const remaining = collected().reduce((sum, val, i) => sum + (categoryDefs[i].total - val), 0);
+
+  // Якщо залишився 0 або 1 предмет, до моменту його отримання всі попередні — дублікати
+  if (sell <= 0 || remaining <= 1) return base;
+
   let total = 0;
   for(const tr of trials){
     if(n <= tr.draws) total += tr.thresholds[n-1];
     else total += tr.completionBudget + buy + (n - tr.draws - 1) * (buy - sell);
   }
   const avg = total / TRIALS;
-
-  // Базовий бюджет (якщо всі спроби — дублікати)
-  const base = buy + (n - 1) * (buy - sell);
-  if (sell <= 0 || avg <= base) return base;
+  if (avg <= base) return base;
 
   // Максимальна кількість нових карток, яка може вплинути на бюджет за n спроб
-  const remaining = collected().reduce((sum, val, i) => sum + (categoryDefs[i].total - val), 0);
-  const maxNewAffectingBudget = Math.min(remaining, n - 1);
+  const maxNewAffectingBudget = Math.min(remaining - 1, n - 1);
 
-  // Знаходимо цілу кількість нових карток k (із заокругленням догори)
-  const k = Math.min(maxNewAffectingBudget, Math.ceil((avg - base) / sell));
+  // Знаходимо цілу кількість нових карток k (математичне округлення)
+  const k = Math.min(maxNewAffectingBudget, Math.round((avg - base) / sell));
 
   return base + k * sell;
 }
