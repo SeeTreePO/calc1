@@ -19,8 +19,8 @@ h2{font-size:1.05rem;margin:0 0 12px}
 .tab-panel[hidden]{display:none}
 .inputs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 label.field{display:block;color:var(--muted);font-size:.9rem}
-input[type=number]{display:block;width:100%;margin-top:6px;background:var(--panel2);color:var(--text);border:1px solid #526071;border-radius:9px;padding:11px;font:inherit;font-variant-numeric:tabular-nums}
-input[type=number]:disabled{opacity:.48;cursor:not-allowed;background:#171c24}
+input[type=number],input[type=text]{display:block;width:100%;margin-top:6px;background:var(--panel2);color:var(--text);border:1px solid #526071;border-radius:9px;padding:11px;font:inherit;font-variant-numeric:tabular-nums}
+input[type=number]:disabled,input[type=text]:disabled{opacity:.48;cursor:not-allowed;background:#171c24}
 input:focus{outline:2px solid var(--accent);outline-offset:1px}
 .hint{color:var(--muted);font-size:.82rem;margin:10px 0 0}
 .sliders{display:grid;gap:13px}
@@ -59,9 +59,10 @@ button:disabled{opacity:.45;cursor:not-allowed;transform:none}
 .cat-badge{display:flex;align-items:center;gap:8px;padding-bottom:10px;font-weight:600;font-size:.92rem;white-space:nowrap}
 .cat-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;border:1px solid rgba(255,255,255,.25)}
 .custom-cat-row label.field{font-size:.8rem}
-.custom-cat-row input[type=number]{margin-top:4px;padding:8px 10px;background:var(--panel)}
+.custom-cat-row input[type=number],.custom-cat-row input[type=text]{margin-top:4px;padding:8px 10px;background:var(--panel)}
 
 .notice-box{margin-top:12px;padding:12px 14px;border-radius:10px;border:1px solid rgba(242,85,90,.55);background:rgba(242,85,90,.12);color:#ffd5d7;font-size:.9rem}
+.notice-box.info-tone{border-color:rgba(117,183,255,.55);background:rgba(117,183,255,.12);color:#dceeff}
 .notice-box[hidden]{display:none}
 .notice-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
 
@@ -152,7 +153,7 @@ details[open] summary{margin-bottom:8px;border-bottom:1px solid var(--line);padd
         <g id="cards-plot"></g>
       </svg>
     </div>
-    <div class="small">Перетягуйте вертикальну лінію на графіку, щоб змінити кількість покупок. Бюджет перераховується автоматично.</div>
+    <div class="small">Перетягуйте вертикальну лінію на графіку, щоб змінити кількість покупок. Бюджет перераховується автоматично.<br>Графік залишається точним в діапазоні до 10000 спроб.</div>
     <br>
     <h2>Прогнозована кількість покупок</h2>
     <p class="stats" id="cards-newItemInfo">До отримання нової картки: <b>1 шт.</b> (20 купонів)</p>
@@ -193,7 +194,7 @@ details[open] summary{margin-bottom:8px;border-bottom:1px solid var(--line);padd
         <g id="items-plot"></g>
       </svg>
     </div>
-    <div class="small">Перетягуйте вертикальну лінію на графіку, щоб змінити кількість покупок. Бюджет перераховується автоматично.</div>
+    <div class="small">Перетягуйте вертикальну лінію на графіку, щоб змінити кількість покупок. Бюджет перераховується автоматично.<br>Графік залишається точним в діапазоні до 10000 спроб.</div>
     <br>
     <h2>Прогнозована кількість покупок</h2>
     <p class="stats" id="items-newItemInfo">До отримання нового предмета: <b>1 шт.</b> (20 купонів)</p>
@@ -205,7 +206,7 @@ details[open] summary{margin-bottom:8px;border-bottom:1px solid var(--line);padd
 <div id="tabPanelCustom" class="tab-panel" role="tabpanel" aria-labelledby="tabBtnCustom" hidden>
   <section class="panel">
     <h2>Налаштування колекції:</h2>
-    <p class="hint">Додайте до 8 категорій, вкажіть кількість предметів у кожній та цілі відсотки шансу випадіння (можна залишити частину або всі поля шансів пустими для авторозрахунку).</p>
+    <p class="hint">Додайте до 8 категорій, вкажіть кількість предметів у кожній та шанс випадіння у відсотках (можна ввести дроби через крапку або кому, або залишити поля пустими для авторозрахунку).</p>
     <br>
     <div class="cat-toolbar">
       <div class="cat-counter" id="custom-catSummary">Категорій: 1 / 8 · Всього предметів: 10</div>
@@ -219,9 +220,11 @@ details[open] summary{margin-bottom:8px;border-bottom:1px solid var(--line);padd
 
     <div id="custom-chanceNotice" class="notice-box" hidden>
       <div id="custom-chanceNoticeText"></div>
-      <div class="notice-actions">
+      <div id="custom-chanceNoticeActions" class="notice-actions">
         <button id="custom-editChanceBtn" class="btn-sm btn-secondary" type="button">Відредагувати</button>
         <button id="custom-normalizeChanceBtn" class="btn-sm btn-accent" type="button">Нормалізувати</button>
+        <button id="custom-minOneChanceBtn" class="btn-sm btn-accent" type="button" hidden>Мін. 1%</button>
+        <button id="custom-fractionalChanceBtn" class="btn-sm btn-secondary" type="button" hidden>Дробові %</button>
       </div>
     </div>
 
@@ -285,7 +288,7 @@ details[open] summary{margin-bottom:8px;border-bottom:1px solid var(--line);padd
         <g id="custom-plot"></g>
       </svg>
     </div>
-    <div class="small">Перетягуйте вертикальну лінію на графіку, щоб змінити кількість покупок. Бюджет перераховується автоматично.</div>
+    <div class="small">Перетягуйте вертикальну лінію на графіку, щоб змінити кількість покупок. Бюджет перераховується автоматично.<br>Графік залишається точним в діапазоні до 10000 спроб.</div>
     <br>
     <h2>Прогнозована кількість покупок</h2>
     <p class="stats" id="custom-newItemInfo">До отримання нового предмета: <b>—</b></p>
@@ -302,8 +305,8 @@ details[open] summary{margin-bottom:8px;border-bottom:1px solid var(--line);padd
 <b>УВАГА! НДІЧАЗ немає жодного стосунку до розробки представленого інструменту</b>
 </p><br>
 <h2>Корисні джерела:</h2>
-<a href="https://stalker.wiki/@e.gregor" target="_blank" rel="noopener noreferrer" class="subscribe-btn">
-  Кабінет асп. Григорука*
+<a href="https://stalker.wiki/invite/e.gregor" target="_blank" rel="noopener noreferrer" class="subscribe-btn">
+  Запрошення на STALKER.WIKI*
 </a><br>
 <a href="https://www.youtube.com/@EmilGregor?sub_confirmation=1" target="_blank" rel="noopener noreferrer" class="subscribe-btn">
   YouTube
@@ -312,16 +315,16 @@ details[open] summary{margin-bottom:8px;border-bottom:1px solid var(--line);padd
   Telegram
 </a><br>
 
-<div class="small">*Заходьте, реєструйтесь, додавайтесь в друзі. При реєстрації в полі «Хто тебе запросив?» вкажіть <b>E.Gregor</b><br>Також напишіть свої враження чи/та зауваження щодо цього інструменту</div>
+<div class="small">*Заходьте, реєструйтесь, в полі «Хто тебе запросив?» вкажіть <b>E.Gregor</b><br>Також додавайтесь в друзі (<a href="https://stalker.wiki/@e.gregor" target="_blank" rel="noopener noreferrer">Кабінет асп. Григорука</a>) та напишіть свої враження чи/та зауваження щодо цього інструменту</div>
 <hr>
 <details>
-  <summary><b>v1.2a</b></summary>
-<p><b>v1.2a</b></p>
+  <summary><b>v1.2</b></summary>
+<p><b>v1.2</b></p>
   <ul>
     <li>Калькулятор запа'мятовує останні введені дані, не потрібно встановлювати положення повзунків «з нуля» (але симуляція при кожному запуску оновлюється, тому суми можуть дещо відрізнятися) </li>
     <li>Доданий калькулятор ПРЕДМЕТІВ</li>
     <li>Доданий калькулятор ВЛАСНОЇ КОЛЕКЦІЇ. Дозволяє вирахувати шанс випадіння колекційних предметів в рамках інших проектів.</li>
-    <li>ТРИВАЄ ТЕСТУВАННЯ</li>
+    <li>Виправлені мілкі проблеми з відображенням</li>
   </ul>  
 <p><b>v1.1</b></p>
   <ul>
@@ -331,8 +334,7 @@ details[open] summary{margin-bottom:8px;border-bottom:1px solid var(--line);padd
     <li>Дрібні виправлення тексту, дизайну</li>
   </ul>
   <p><b>v1.0 </b>Базовий функціонал</p>
-</details>
-</section>
+</details></section>
 
 <!-- Пасхалка -->
 <button id="eggTrigger" type="button" aria-label="Пасхалка">🥚</button>
@@ -548,6 +550,22 @@ function intValue(el) {
   return Number.isFinite(v) ? Math.trunc(v) : NaN;
 }
 
+function parseChanceInput(rawStr) {
+  const trimmed = String(rawStr ?? '').trim();
+  if (trimmed === '') return null;
+  const normalizedStr = trimmed.replace(',', '.');
+  if (!/^\d+(?:[.,]\d+)?$/.test(normalizedStr)) return NaN;
+  const num = Number(normalizedStr);
+  return Number.isFinite(num) && num >= 0 ? num : NaN;
+}
+
+function formatNumberClean(num, decimals = 1) {
+  if (!Number.isFinite(num)) return '0';
+  const rounded = Number(num.toFixed(decimals));
+  if (Number.isInteger(rounded)) return String(rounded);
+  return rounded.toFixed(decimals).replace(/\.?0+$/, '');
+}
+
 function loadSavedState() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -569,32 +587,165 @@ function persistAll() {
   }
 }
 
-// Метод найбільших залишків (Гамільтона) для приведення ваг до цілих відсотків із сумою targetSum
-function distributeIntegers(weights, targetSum) {
+// Метод найбільших залишків (Гамільтона) для приведення ваг до цілих одиниць із сумою targetSum
+function distributeIntegers(weights, targetSum, minPerItem = 0) {
   const n = weights.length;
   if (n === 0 || targetSum <= 0) return new Array(n).fill(0);
 
+  const safeMin = Math.max(0, Math.floor(minPerItem));
+  const baseFloors = new Array(n).fill(safeMin);
+  let allocatable = Math.max(0, targetSum - safeMin * n);
+
   const safeWeights = weights.map(w => (Number.isFinite(w) && w > 0 ? w : 0));
   const totalWeight = safeWeights.reduce((a, b) => a + b, 0);
-
   const effective = totalWeight > 0 ? safeWeights : new Array(n).fill(1);
   const sum = effective.reduce((a, b) => a + b, 0);
 
   const items = effective.map((w, idx) => {
-    const exact = (w / sum) * targetSum;
+    const exact = (w / sum) * allocatable;
     const floor = Math.floor(exact);
     return { idx, floor, rem: exact - floor };
   });
 
-  let remaining = targetSum - items.reduce((a, it) => a + it.floor, 0);
+  let remaining = allocatable - items.reduce((a, it) => a + it.floor, 0);
   const byRemainder = [...items].sort((a, b) => (b.rem - a.rem) || (a.idx - b.idx));
   for (let i = 0; i < remaining; i++) {
     byRemainder[i % n].floor += 1;
   }
 
   const res = new Array(n);
-  items.forEach(it => { res[it.idx] = it.floor; });
+  items.forEach(it => {
+    res[it.idx] = baseFloors[it.idx] + it.floor;
+  });
   return res;
+}
+
+// Нормалізація до 100% з кроком 0.1% (у десятих частках, сума = 1000 = 100.0%)
+function distributeTenths(weights, minTenthsPerItem = 1) {
+  const n = weights.length;
+  if (n === 0) return { displayTexts: [], exactShares: [] };
+
+  const safeWeights = weights.map(w => (Number.isFinite(w) && w > 0 ? w : 0));
+  const totalWeight = safeWeights.reduce((a, b) => a + b, 0);
+  const effective = totalWeight > 0 ? safeWeights : new Array(n).fill(1);
+  const sum = effective.reduce((a, b) => a + b, 0);
+
+  const exactShares = effective.map(w => w / sum);
+  const tenths = distributeIntegers(effective, 1000, minTenthsPerItem);
+  const displayTexts = tenths.map(t => formatNumberClean(t / 10, 1));
+
+  return { displayTexts, exactShares };
+}
+
+// Розрахунок відображення для авторежиму (коли всі поля шансів пусті або нульові)
+// із компенсацією похибки через найбільшу категорію
+function computeAutoDisplayFromMax(categories) {
+  const n = categories.length;
+  const maxSum = categories.reduce((a, c) => a + c.max, 0);
+  const exactShares = categories.map(c => c.max / maxSum);
+  const exactPercents = exactShares.map(s => s * 100);
+
+  const isBelowOneTenth = exactPercents.map(p => p > 0 && p < 0.1);
+  const belowCount = isBelowOneTenth.filter(Boolean).length;
+
+  const maxVal = Math.max(...categories.map(c => c.max));
+  const largestIndices = categories
+    .map((c, idx) => (c.max === maxVal ? idx : -1))
+    .filter(idx => idx !== -1);
+
+  const displayTexts = new Array(n).fill('0');
+  const displayNotes = new Array(n).fill(false);
+
+  for (let i = 0; i < n; i++) {
+    if (isBelowOneTenth[i]) {
+      displayTexts[i] = '0.1';
+      displayNotes[i] = true;
+    }
+  }
+
+  let middleDisplayedTenths = 0;
+  for (let i = 0; i < n; i++) {
+    if (!isBelowOneTenth[i] && !largestIndices.includes(i)) {
+      const roundedTenths = Math.round(exactPercents[i] * 10);
+      displayTexts[i] = formatNumberClean(roundedTenths / 10, 1);
+      middleDisplayedTenths += roundedTenths;
+    }
+  }
+
+  let displayWarning = false;
+
+  if (belowCount > 0) {
+    const minOtherTenths = 1000 - belowCount;
+    const maxOtherTenths = 999;
+
+    if (largestIndices.length === 1) {
+      const targetIdx = largestIndices[0];
+      const exactLargestTenths = Math.round(exactPercents[targetIdx] * 10);
+      let largestTenths = clamp(exactLargestTenths, minOtherTenths - middleDisplayedTenths, maxOtherTenths - middleDisplayedTenths);
+      if (middleDisplayedTenths + largestTenths < minOtherTenths) {
+        largestTenths = clamp(minOtherTenths - middleDisplayedTenths, 1, 999);
+      }
+      displayTexts[targetIdx] = formatNumberClean(largestTenths / 10, 1);
+    } else {
+      const minLargestTotal = Math.max(0, minOtherTenths - middleDisplayedTenths);
+      const maxLargestTotal = Math.max(minLargestTotal, maxOtherTenths - middleDisplayedTenths);
+      const mCount = largestIndices.length;
+
+      let chosenEqualTenths = null;
+      const approxTenths = Math.round(((minLargestTotal + maxLargestTotal) / 2) / mCount);
+      for (let delta = 0; delta <= 50; delta++) {
+        for (const candidate of [approxTenths - delta, approxTenths + delta]) {
+          if (candidate < 1) continue;
+          const total = candidate * mCount;
+          if (total >= minLargestTotal && total <= maxLargestTotal) {
+            chosenEqualTenths = candidate;
+            break;
+          }
+        }
+        if (chosenEqualTenths !== null) break;
+      }
+
+      if (chosenEqualTenths !== null) {
+        largestIndices.forEach(idx => {
+          displayTexts[idx] = formatNumberClean(chosenEqualTenths / 10, 1);
+        });
+      } else {
+        displayWarning = true;
+        const targetSumTenths = clamp(
+          Math.round(largestIndices.reduce((s, idx) => s + exactPercents[idx] * 10, 0)),
+          minLargestTotal,
+          maxLargestTotal
+        );
+        const splitTenths = distributeIntegers(new Array(mCount).fill(1), targetSumTenths, 1);
+        largestIndices.forEach((idx, pos) => {
+          displayTexts[idx] = formatNumberClean(splitTenths[pos] / 10, 1);
+        });
+      }
+    }
+  } else {
+    if (largestIndices.length === 1) {
+      const targetIdx = largestIndices[0];
+      const remTenths = Math.max(1, 1000 - middleDisplayedTenths);
+      displayTexts[targetIdx] = formatNumberClean(remTenths / 10, 1);
+    } else {
+      const mCount = largestIndices.length;
+      const remTenths = Math.max(mCount, 1000 - middleDisplayedTenths);
+      const equalCandidate = Math.round(remTenths / mCount);
+      if (equalCandidate * mCount === remTenths) {
+        largestIndices.forEach(idx => {
+          displayTexts[idx] = formatNumberClean(equalCandidate / 10, 1);
+        });
+      } else {
+        displayWarning = true;
+        const splitTenths = distributeIntegers(new Array(mCount).fill(1), remTenths, 1);
+        largestIndices.forEach((idx, pos) => {
+          displayTexts[idx] = formatNumberClean(splitTenths[pos] / 10, 1);
+        });
+      }
+    }
+  }
+
+  return { displayTexts, displayNotes, exactShares, displayWarning };
 }
 
 // =========================================================
@@ -676,7 +827,6 @@ function createFixedTab(config) {
     dragging: false
   };
 
-  // Відновлення збереженого стану вкладки
   const saved = savedAll[prefix];
   if (saved && typeof saved === 'object') {
     if (Array.isArray(saved.values)) {
@@ -930,8 +1080,11 @@ function createCustomTab() {
   const catListEl = $('custom-catList');
   const chanceNoticeEl = $('custom-chanceNotice');
   const chanceNoticeTextEl = $('custom-chanceNoticeText');
+  const chanceNoticeActionsEl = $('custom-chanceNoticeActions');
   const editChanceBtn = $('custom-editChanceBtn');
   const normalizeChanceBtn = $('custom-normalizeChanceBtn');
+  const minOneChanceBtn = $('custom-minOneChanceBtn');
+  const fractionalChanceBtn = $('custom-fractionalChanceBtn');
   const confirmBtn = $('custom-confirmBtn');
 
   const collectedPanelEl = $('custom-collectedPanel');
@@ -958,7 +1111,7 @@ function createCustomTab() {
 
   const state = {
     categories: [
-      { max: 10, chanceText: '', collected: 0 }
+      { max: 10, chanceText: '', collected: 0, exactProb: null, autoGenerated: false, belowOneTenth: false }
     ],
     confirmed: false,
     calculated: false,
@@ -971,14 +1124,16 @@ function createCustomTab() {
     dragging: false
   };
 
-  // Відновлення збереженого стану 3-ї вкладки
   const saved = savedAll.custom;
   if (saved && typeof saved === 'object') {
     if (Array.isArray(saved.categories) && saved.categories.length >= 1 && saved.categories.length <= 8) {
       state.categories = saved.categories.map(c => ({
         max: Number.isFinite(c.max) && c.max >= 1 ? Math.trunc(c.max) : 10,
         chanceText: typeof c.chanceText === 'string' ? c.chanceText : '',
-        collected: Number.isFinite(c.collected) && c.collected >= 0 ? Math.trunc(c.collected) : 0
+        collected: Number.isFinite(c.collected) && c.collected >= 0 ? Math.trunc(c.collected) : 0,
+        exactProb: typeof c.exactProb === 'number' && Number.isFinite(c.exactProb) && c.exactProb > 0 ? c.exactProb : null,
+        autoGenerated: Boolean(c.autoGenerated),
+        belowOneTenth: Boolean(c.belowOneTenth)
       }));
       state.categories.forEach(c => {
         c.collected = clamp(c.collected, 0, c.max);
@@ -1007,7 +1162,10 @@ function createCustomTab() {
       categories: state.categories.map(c => ({
         max: c.max,
         chanceText: c.chanceText,
-        collected: c.collected
+        collected: c.collected,
+        exactProb: c.exactProb,
+        autoGenerated: c.autoGenerated,
+        belowOneTenth: c.belowOneTenth
       })),
       budgetText: budgetEl.value,
       buyText: buyEl.value,
@@ -1023,12 +1181,27 @@ function createCustomTab() {
 
   function hideNotice() {
     chanceNoticeEl.hidden = true;
+    chanceNoticeEl.classList.remove('info-tone');
     chanceNoticeTextEl.textContent = '';
+    chanceNoticeActionsEl.hidden = false;
+    normalizeChanceBtn.hidden = true;
+    minOneChanceBtn.hidden = true;
+    fractionalChanceBtn.hidden = true;
   }
 
-  function showNotice(text, showNormalize = true) {
+  function showNotice(text, options = {}) {
+    const {
+      showNormalize = false,
+      showMinOne = false,
+      showFractional = false,
+      infoOnly = false
+    } = options;
     chanceNoticeTextEl.textContent = text;
+    chanceNoticeEl.classList.toggle('info-tone', infoOnly);
+    chanceNoticeActionsEl.hidden = infoOnly;
     normalizeChanceBtn.hidden = !showNormalize;
+    minOneChanceBtn.hidden = !showMinOne;
+    fractionalChanceBtn.hidden = !showFractional;
     chanceNoticeEl.hidden = false;
   }
 
@@ -1067,6 +1240,7 @@ function createCustomTab() {
     catListEl.innerHTML = '';
     state.categories.forEach((cat, idx) => {
       const color = CUSTOM_PALETTE[idx % CUSTOM_PALETTE.length];
+      const chanceFieldLabel = cat.belowOneTenth ? 'Шанс (%)(<)' : 'Шанс (%)';
       const row = document.createElement('div');
       row.className = 'custom-cat-row';
       row.innerHTML = `
@@ -1077,18 +1251,21 @@ function createCustomTab() {
         <label class="field">Кількість (макс.)
           <input type="number" min="1" step="1" inputmode="numeric" value="${cat.max}" ${state.confirmed ? 'disabled' : ''}>
         </label>
-        <label class="field">Шанс (%)
-          <input type="number" min="0" max="100" step="1" inputmode="numeric" placeholder="Авто" value="${cat.chanceText}" ${state.confirmed ? 'disabled' : ''}>
+        <label class="field">${chanceFieldLabel}
+          <input type="text" inputmode="decimal" placeholder="Авто" value="${cat.chanceText}" ${state.confirmed ? 'disabled' : ''}>
         </label>
       `;
 
-      const [maxInput, chanceInput] = row.querySelectorAll('input');
+      const maxInput = row.querySelector('input[type=number]');
+      const chanceInput = row.querySelector('input[type=text]');
 
       maxInput.addEventListener('input', () => {
         const raw = Number(maxInput.value);
         const val = Number.isFinite(raw) && raw >= 1 ? Math.trunc(raw) : 1;
         cat.max = val;
         cat.collected = clamp(cat.collected, 0, val);
+        cat.exactProb = null;
+        cat.belowOneTenth = false;
         hideNotice();
         updateSummary();
         renderSliders();
@@ -1100,9 +1277,21 @@ function createCustomTab() {
       });
 
       chanceInput.addEventListener('input', () => {
-        cat.chanceText = chanceInput.value.trim();
+        cat.chanceText = chanceInput.value.trim().replace(',', '.');
+        cat.exactProb = null;
+        cat.autoGenerated = false;
+        cat.belowOneTenth = false;
         hideNotice();
         saveCustomState();
+      });
+
+      chanceInput.addEventListener('blur', () => {
+        const parsed = parseChanceInput(chanceInput.value);
+        if (parsed !== null && !Number.isNaN(parsed)) {
+          cat.chanceText = formatNumberClean(parsed, 1);
+          chanceInput.value = cat.chanceText;
+          saveCustomState();
+        }
       });
 
       catListEl.appendChild(row);
@@ -1121,14 +1310,17 @@ function createCustomTab() {
     slidersEl.innerHTML = '';
     state.categories.forEach((cat, idx) => {
       const color = CUSTOM_PALETTE[idx % CUSTOM_PALETTE.length];
-      const chanceLabel = cat.chanceText !== '' ? ` (${cat.chanceText}%)` : '';
+      let chanceBadge = '';
+      if (cat.chanceText !== '') {
+        chanceBadge = cat.belowOneTenth ? ` (<${cat.chanceText}%)` : ` (${cat.chanceText}%)`;
+      }
       const row = document.createElement('div');
       row.className = 'slider-row';
       row.innerHTML = `
         <div>
           <label for="custom-slider-${idx}">
             <span class="cat-dot" style="background:${color}"></span>
-            <span>Категорія ${idx + 1}${chanceLabel}</span>
+            <span>Категорія ${idx + 1}${chanceBadge}</span>
           </label>
           <input id="custom-slider-${idx}" type="range" min="0" max="${cat.max}" value="${cat.collected}" style="accent-color:${color}" ${state.confirmed ? '' : 'disabled'}>
         </div>
@@ -1154,89 +1346,190 @@ function createCustomTab() {
     updateCollectedLabel();
   }
 
-  function evaluateChances() {
-    const parsed = state.categories.map(c => {
-      if (c.chanceText === '') return null;
-      const num = Number(c.chanceText);
-      if (!Number.isFinite(num) || num < 0 || !Number.isInteger(num)) return NaN;
-      return num;
-    });
-
-    if (parsed.some(v => Number.isNaN(v))) {
-      return {
-        ok: false,
-        canNormalize: false,
-        message: 'Шанси мають бути цілими невід’ємними числами (у відсотках).'
-      };
+  function getWeightsForNormalization() {
+    const parsed = state.categories.map(c => parseChanceInput(c.chanceText));
+    const hasAnyNonZero = parsed.some(v => typeof v === 'number' && !Number.isNaN(v) && v > 0);
+    if (hasAnyNonZero) {
+      return parsed.map(v => (typeof v === 'number' && !Number.isNaN(v) && v > 0 ? v : 0));
     }
-
-    const emptyIndices = [];
-    let filledSum = 0;
-    parsed.forEach((val, idx) => {
-      if (val === null) emptyIndices.push(idx);
-      else filledSum += val;
-    });
-
-    // 1. Усі поля пусті -> пропорційно до максимуму в категорії
-    if (emptyIndices.length === state.categories.length) {
-      const weights = state.categories.map(c => c.max);
-      const dist = distributeIntegers(weights, 100);
-      return { ok: true, chances: dist };
-    }
-
-    // 2. Частково пусті поля
-    if (emptyIndices.length > 0) {
-      const rem = 100 - filledSum;
-      if (rem < 0) {
-        return {
-          ok: false,
-          canNormalize: true,
-          message: `Сума введених шансів становить ${filledSum}%, що перевищує 100%. Відредагуйте вручну або натисніть «Нормалізувати».`
-        };
-      }
-      const emptyShare = distributeIntegers(new Array(emptyIndices.length).fill(1), rem);
-      const result = [...parsed];
-      emptyIndices.forEach((catIdx, i) => {
-        result[catIdx] = emptyShare[i];
-      });
-      return { ok: true, chances: result };
-    }
-
-    // 3. Усі поля заповнені
-    if (filledSum !== 100) {
-      return {
-        ok: false,
-        canNormalize: filledSum > 0,
-        message: `Сума шансів зараз дорівнює ${filledSum}%, а має бути 100%. Відредагуйте вручну або натисніть «Нормалізувати».`
-      };
-    }
-
-    return { ok: true, chances: parsed };
+    return state.categories.map(c => c.max);
   }
 
-  function normalizeChances() {
-    const filled = state.categories.map(c => {
-      if (c.chanceText === '') return null;
-      const n = Number(c.chanceText);
-      return Number.isFinite(n) && n >= 0 ? n : 0;
-    });
+  function applyStandardNormalization() {
+    const weights = getWeightsForNormalization();
+    const dist = distributeIntegers(weights, 100, 0);
 
-    let weights;
-    if (filled.every(v => v === null)) {
-      weights = state.categories.map(c => c.max);
-    } else {
-      weights = filled.map(v => (v === null ? 0 : v));
+    if (dist.some(v => v === 0)) {
+      showNotice(
+        'Завелика відносна різниця між категоріями: при звичайній нормалізації частина категорій отримала б 0%. Оберіть варіант:',
+        { showMinOne: true, showFractional: true }
+      );
+      return;
     }
 
-    const normalized = distributeIntegers(weights, 100);
     state.categories.forEach((c, idx) => {
-      c.chanceText = String(normalized[idx]);
+      c.chanceText = String(dist[idx]);
+      c.exactProb = dist[idx] / 100;
+      c.autoGenerated = false;
+      c.belowOneTenth = false;
     });
-
     hideNotice();
     renderCategoryBuilders();
     renderSliders();
     saveCustomState();
+  }
+
+  function applyMinOneNormalization() {
+    const weights = getWeightsForNormalization();
+    const dist = distributeIntegers(weights, 100, 1);
+    state.categories.forEach((c, idx) => {
+      c.chanceText = String(dist[idx]);
+      c.exactProb = dist[idx] / 100;
+      c.autoGenerated = false;
+      c.belowOneTenth = false;
+    });
+    hideNotice();
+    renderCategoryBuilders();
+    renderSliders();
+    saveCustomState();
+  }
+
+  function applyFractionalNormalization() {
+    const weights = getWeightsForNormalization();
+    const { displayTexts, exactShares } = distributeTenths(weights, 1);
+    const totalWeight = weights.reduce((a, b) => a + b, 0);
+
+    state.categories.forEach((c, idx) => {
+      const realPct = totalWeight > 0 ? (weights[idx] / totalWeight) * 100 : (100 / weights.length);
+      c.chanceText = displayTexts[idx];
+      c.exactProb = exactShares[idx];
+      c.autoGenerated = true;
+      c.belowOneTenth = realPct > 0 && realPct < 0.1;
+    });
+    hideNotice();
+    renderCategoryBuilders();
+    renderSliders();
+    saveCustomState();
+  }
+
+  function evaluateChancesForConfirm() {
+    const allAutoGenerated = state.categories.every(c => c.autoGenerated);
+    const parsed = state.categories.map(c => parseChanceInput(c.chanceText));
+
+    if (parsed.some(v => Number.isNaN(v))) {
+      return {
+        ok: false,
+        message: 'Шанси мають бути невід’ємними числами (у відсотках).',
+        options: {}
+      };
+    }
+
+    const openIndices = [];
+    let filledSum = 0;
+    parsed.forEach((val, idx) => {
+      if (val === null || val === 0) openIndices.push(idx);
+      else filledSum += val;
+    });
+
+    // 1. Усі категорії пусті/нульові або були згенеровані автоматично без ручних правок
+    if (openIndices.length === state.categories.length || allAutoGenerated) {
+      const autoRes = computeAutoDisplayFromMax(state.categories);
+      return {
+        ok: true,
+        displayTexts: autoRes.displayTexts,
+        displayNotes: autoRes.displayNotes,
+        exactShares: autoRes.exactShares,
+        autoGenerated: true,
+        displayWarning: autoRes.displayWarning
+      };
+    }
+
+    // 2. Частково пусті/нульові категорії
+    if (openIndices.length > 0) {
+      if (filledSum > 100) {
+        const weights = parsed.map(v => (v === null ? 0 : v));
+        const wouldZero = distributeIntegers(weights, 100, 0).some(x => x === 0);
+        return {
+          ok: false,
+          message: `Сума введених шансів становить ${formatNumberClean(filledSum, 2)}% (перевищує 100%).`,
+          options: wouldZero
+            ? { showMinOne: true, showFractional: true }
+            : { showNormalize: true }
+        };
+      }
+
+      if (Math.abs(filledSum - 100) <= 1e-9) {
+        return {
+          ok: false,
+          message: 'Сума шансів уже становить 100%, але частина категорій лишилася порожньою або нульовою.',
+          options: { showNormalize: true }
+        };
+      }
+
+      const rem = 100 - filledSum;
+      const openWeights = new Array(openIndices.length).fill(1);
+      const openTenths = distributeIntegers(openWeights, Math.round(rem * 10), 0);
+
+      const displayTexts = parsed.map((val, idx) => {
+        if (val !== null && val > 0) return formatNumberClean(val, 1);
+        const posInOpen = openIndices.indexOf(idx);
+        const tenthsVal = openTenths[posInOpen];
+        const shown = tenthsVal > 0 ? Math.max(1, tenthsVal) / 10 : 0;
+        return formatNumberClean(shown, 1);
+      });
+
+      const displayNotes = parsed.map((val, idx) => {
+        if (val !== null && val > 0) return val < 0.1;
+        const posInOpen = openIndices.indexOf(idx);
+        const rawSharePct = (openTenths[posInOpen] / 10);
+        return rawSharePct > 0 && rawSharePct < 0.1;
+      });
+
+      const exactShares = parsed.map((val, idx) => {
+        if (val !== null && val > 0) return val / 100;
+        const posInOpen = openIndices.indexOf(idx);
+        return (openTenths[posInOpen] / 10) / 100;
+      });
+
+      const totalExact = exactShares.reduce((a, b) => a + b, 0);
+      const normalizedExact = totalExact > 0
+        ? exactShares.map(p => p / totalExact)
+        : new Array(state.categories.length).fill(1 / state.categories.length);
+
+      return {
+        ok: true,
+        displayTexts,
+        displayNotes,
+        exactShares: normalizedExact,
+        autoGenerated: false,
+        displayWarning: false
+      };
+    }
+
+    // 3. Усі поля заповнені ненульовими значеннями -> сума має дорівнювати 100
+    if (Math.abs(filledSum - 100) > 1e-9) {
+      const weights = parsed.map(v => (v > 0 ? v : 0));
+      const wouldZero = distributeIntegers(weights, 100, 0).some(x => x === 0);
+      return {
+        ok: false,
+        message: `Сума шансів зараз становить ${formatNumberClean(filledSum, 2)}%, а має дорівнювати 100%.`,
+        options: wouldZero
+          ? { showMinOne: true, showFractional: true }
+          : { showNormalize: true }
+      };
+    }
+
+    const displayTexts = parsed.map(v => formatNumberClean(v, 1));
+    const displayNotes = parsed.map(v => v > 0 && v < 0.1);
+    const exactShares = parsed.map(v => v / 100);
+    return {
+      ok: true,
+      displayTexts,
+      displayNotes,
+      exactShares,
+      autoGenerated: false,
+      displayWarning: false
+    };
   }
 
   function getEconomySettings() {
@@ -1268,12 +1561,10 @@ function createCustomTab() {
     return null;
   }
 
-  // Зворотний перерахунок: кількість шансів n -> потрібний бюджет
   function requiredBudget(n) {
     const { buy, isPack, packSize, sell } = getEconomySettings();
     if (n <= 0) return 0;
 
-    // У режимі паків оплата відбувається лише цілими паками
     if (isPack) {
       return Math.ceil(n / packSize) * buy;
     }
@@ -1296,7 +1587,6 @@ function createCustomTab() {
     return base + k * sell;
   }
 
-  // Прямий перерахунок: бюджет -> доступна кількість шансів
   function averageAffordable(budget) {
     const { buy, isPack, packSize } = getEconomySettings();
     if (!Number.isFinite(budget) || budget < buy) return 0;
@@ -1346,6 +1636,22 @@ function createCustomTab() {
     meanInfoEl.innerHTML = `До завершення колекції: ${formatBudgetDetails(meanDraws, meanBudget)}`;
   }
 
+  function resolveSimulationProbabilities() {
+    const hasExact = state.categories.every(c => typeof c.exactProb === 'number' && Number.isFinite(c.exactProb) && c.exactProb > 0);
+    if (hasExact) {
+      const sum = state.categories.reduce((a, c) => a + c.exactProb, 0);
+      return state.categories.map(c => c.exactProb / sum);
+    }
+
+    const parsed = state.categories.map(c => parseChanceInput(c.chanceText));
+    const sum = parsed.reduce((a, b) => a + (b || 0), 0);
+    if (sum > 0) {
+      return parsed.map(v => (v || 0) / sum);
+    }
+    const maxSum = state.categories.reduce((a, c) => a + c.max, 0);
+    return state.categories.map(c => c.max / maxSum);
+  }
+
   function simulate({ preserveSelection = false } = {}) {
     const econError = validateEconomy();
     if (econError) {
@@ -1357,13 +1663,7 @@ function createCustomTab() {
       return;
     }
 
-    const chanceCheck = evaluateChances();
-    if (!chanceCheck.ok) {
-      state.valid = false;
-      return;
-    }
-
-    const probs = chanceCheck.chances.map(p => p / 100);
+    const probs = resolveSimulationProbabilities();
     const cumulative = [];
     let acc = 0;
     for (let i = 0; i < probs.length; i++) {
@@ -1452,7 +1752,7 @@ function createCustomTab() {
 
   addCatBtn.addEventListener('click', () => {
     if (state.confirmed || state.categories.length >= 8) return;
-    state.categories.push({ max: 10, chanceText: '', collected: 0 });
+    state.categories.push({ max: 10, chanceText: '', collected: 0, exactProb: null, autoGenerated: false, belowOneTenth: false });
     hideNotice();
     renderCategoryBuilders();
     renderSliders();
@@ -1470,17 +1770,24 @@ function createCustomTab() {
 
   editChanceBtn.addEventListener('click', () => {
     hideNotice();
-    const firstInput = catListEl.querySelector('input[type=number]');
-    if (firstInput) firstInput.focus();
+    const chanceInputs = catListEl.querySelectorAll('input[type=text]');
+    if (chanceInputs.length > 0) chanceInputs[0].focus();
   });
 
   normalizeChanceBtn.addEventListener('click', () => {
-    normalizeChances();
+    applyStandardNormalization();
+  });
+
+  minOneChanceBtn.addEventListener('click', () => {
+    applyMinOneNormalization();
+  });
+
+  fractionalChanceBtn.addEventListener('click', () => {
+    applyFractionalNormalization();
   });
 
   confirmBtn.addEventListener('click', () => {
     if (state.confirmed) {
-      // Перехід у режим редагування колекції
       state.confirmed = false;
       state.calculated = false;
       state.valid = false;
@@ -1492,24 +1799,30 @@ function createCustomTab() {
       return;
     }
 
-    // Валідація максимумів
     state.categories.forEach(c => {
       if (!Number.isFinite(c.max) || c.max < 1) c.max = 1;
       c.collected = clamp(c.collected, 0, c.max);
     });
 
-    const chanceRes = evaluateChances();
+    const chanceRes = evaluateChancesForConfirm();
     if (!chanceRes.ok) {
-      showNotice(chanceRes.message, chanceRes.canNormalize);
+      showNotice(chanceRes.message, chanceRes.options);
       return;
     }
 
-    // Підставляємо розраховані відсотки прямо в інпути шансів
     state.categories.forEach((c, idx) => {
-      c.chanceText = String(chanceRes.chances[idx]);
+      c.chanceText = chanceRes.displayTexts[idx];
+      c.exactProb = chanceRes.exactShares[idx];
+      c.autoGenerated = chanceRes.autoGenerated;
+      c.belowOneTenth = chanceRes.displayNotes[idx];
     });
 
-    hideNotice();
+    if (chanceRes.displayWarning) {
+      showNotice('Дані для відображення можуть дещо відрізнятися від розрахункових', { infoOnly: true });
+    } else {
+      hideNotice();
+    }
+
     state.confirmed = true;
     state.calculated = false;
     renderCategoryBuilders();
