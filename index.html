@@ -5,28 +5,72 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Калькулятор колекції карток</title>
 <style>
-:root{color-scheme:dark;--bg:#11151b;--panel:#1a2029;--panel2:#222a35;--text:#eef2f7;--muted:#aab5c3;--line:#3b4655;--accent:#75b7ff}
+:root{color-scheme:dark;--bg:#11151b;--panel:#1a2029;--panel2:#222a35;--text:#eef2f7;--muted:#aab5c3;--line:#3b4655;--accent:#75b7ff;--danger:#f2555a;--ok:#6fd69b}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--text);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;padding:18px}
 main{max-width:900px;margin:0 auto}
 h1{font-size:1.35rem;margin:0 0 16px}
 h2{font-size:1.05rem;margin:0 0 12px}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;margin:0 0 14px}
+.tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:0 0 14px}
+.tab-btn{margin-top:0;background:var(--panel);color:var(--muted);border:1px solid var(--line);border-radius:12px;padding:11px 10px;font:600 .95rem system-ui;cursor:pointer;transition:background .15s ease,color .15s ease,border-color .15s ease}
+.tab-btn:hover{color:var(--text);border-color:#526071}
+.tab-btn[aria-selected="true"]{background:#27384d;color:var(--text);border-color:var(--accent)}
+.tab-panel[hidden]{display:none}
 .inputs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 label.field{display:block;color:var(--muted);font-size:.9rem}
 input[type=number]{display:block;width:100%;margin-top:6px;background:var(--panel2);color:var(--text);border:1px solid #526071;border-radius:9px;padding:11px;font:inherit;font-variant-numeric:tabular-nums}
+input[type=number]:disabled{opacity:.48;cursor:not-allowed;background:#171c24}
 input:focus{outline:2px solid var(--accent);outline-offset:1px}
 .hint{color:var(--muted);font-size:.82rem;margin:10px 0 0}
 .sliders{display:grid;gap:13px}
 .slider-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center}
-.slider-row label{font-weight:600}
-.slider-row 
-.count{font-variant-numeric:tabular-nums;color:var(--muted);min-width:52px;text-align:right}
+.slider-row label{font-weight:600;display:flex;align-items:center;gap:8px}
+.count{font-variant-numeric:tabular-nums;color:var(--muted);min-width:62px;text-align:right}
 input[type=range]{width:100%;margin:8px 0 0;accent-color:var(--accent);touch-action:pan-y}
-input.legendary{accent-color:#f2a340}
-input.epic{accent-color:#e36bd5}
-input.rare{accent-color:#67baff}
-input.common{accent-color:#7acb83}.graph-wrap{width:100%;overflow:hidden}
+
+/* Кольори повзунків для вкладки «Картки» */
+input.cards-common{accent-color:#7acb83}
+input.cards-rare{accent-color:#67baff}
+input.cards-epic{accent-color:#e36bd5}
+input.cards-legendary{accent-color:#f2a340}
+
+/* Кольори повзунків для вкладки «Предмети» */
+input.items-common{accent-color:#b6c2d1}
+input.items-uncommon{accent-color:#67baff}
+input.items-rare{accent-color:#e36bd5}
+input.items-epic{accent-color:#f2555a}
+input.items-legendary{accent-color:#f2a340}
+
+/* Кастомна вкладка: конструктор категорій */
+.cat-toolbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.cat-counter{font-size:.9rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.btn-group{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn-sm{margin-top:0;padding:8px 13px;font-size:.9rem;border-radius:9px;background:#263445;border:1px solid #435469}
+.btn-sm:hover:not(:disabled){background:#2f4156}
+.btn-secondary{background:#26303d;border:1px solid #485668;color:var(--text)}
+.btn-secondary:hover:not(:disabled){background:#313d4d}
+.btn-accent{background:#315f8d;color:#fff}
+.btn-accent:hover:not(:disabled){background:#3a6fa4}
+button:disabled{opacity:.45;cursor:not-allowed;transform:none}
+
+.custom-cat-list{display:grid;gap:10px}
+.custom-cat-row{display:grid;grid-template-columns:auto 1fr 1fr;gap:10px;align-items:end;background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:10px 12px}
+.cat-badge{display:flex;align-items:center;gap:8px;padding-bottom:10px;font-weight:600;font-size:.92rem;white-space:nowrap}
+.cat-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;border:1px solid rgba(255,255,255,.25)}
+.custom-cat-row label.field{font-size:.8rem}
+.custom-cat-row input[type=number]{margin-top:4px;padding:8px 10px;background:var(--panel)}
+
+.notice-box{margin-top:12px;padding:12px 14px;border-radius:10px;border:1px solid rgba(242,85,90,.55);background:rgba(242,85,90,.12);color:#ffd5d7;font-size:.9rem}
+.notice-box[hidden]{display:none}
+.notice-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+
+.radio-group{display:flex;flex-wrap:wrap;gap:14px;margin:12px 0 8px}
+.radio-option{display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-size:.92rem;color:var(--text);user-select:none}
+.radio-option input[type=radio]{accent-color:var(--accent);width:16px;height:16px;margin:0;cursor:pointer}
+.subpanel-disabled{opacity:.55;pointer-events:none}
+
+.graph-wrap{width:100%;overflow:hidden}
 svg{display:block;width:100%;height:auto;touch-action:pan-y;user-select:none}
 .axis{stroke:#758295;stroke-width:1}.gridline{stroke:#3a4553;stroke-width:1;stroke-dasharray:3 4}
 .tick{fill:#aab5c3;font-size:11px}.axis-title{fill:#dce4ee;font-size:12px}
@@ -36,50 +80,24 @@ svg{display:block;width:100%;height:auto;touch-action:pan-y;user-select:none}
 .marker-label{fill:#ffda91;font-size:12px;font-weight:700}
 .stats{margin:12px 0 0;font-variant-numeric:tabular-nums}
 button{margin-top:14px;border:0;border-radius:10px;padding:12px 16px;background:#315f8d;color:white;font:600 1rem system-ui;cursor:pointer}
-button:active{transform:translateY(1px)}
+button:active:not(:disabled){transform:translateY(1px)}
 .small{font-size:.82rem;color:var(--muted)}
-@media(max-width:560px){body{padding:12px}.panel{padding:13px}.inputs{grid-template-columns:1fr}.tick{font-size:10px}}
- .center-img {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-  }
-.subscribe-btn {
-  display: inline-block;
-  padding: 10px 16px;
-  margin: 5px;
-  border-radius: 8px;
-  background: #333;
-  color: white;
-  text-decoration: none;
-  font-weight: bold;
+@media(max-width:600px){
+  body{padding:12px}
+  .panel{padding:13px}
+  .tabs{gap:6px}
+  .tab-btn{padding:10px 6px;font-size:.86rem}
+  .inputs{grid-template-columns:1fr}
+  .custom-cat-row{grid-template-columns:1fr 1fr}
+  .cat-badge{grid-column:1 / -1;padding-bottom:0}
+  .tick{font-size:10px}
 }
-hr {
-  border: 0;
-  border-top: 1px solid var(--line);
-  margin: 16px 0;
-}
-details {
-  background: var(--panel2);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 10px 14px;
-  margin-top: 10px;
-}
-
-summary {
-  cursor: pointer;
-  font-weight: 600;
-  color: var(--accent);
-  user-select: none; /* Щоб текст заголовка не виділявся синім при швидких кліках */
-}
-
-details[open] summary {
-  margin-bottom: 8px;
-  border-bottom: 1px solid var(--line);
-  padding-bottom: 8px;
-}
-
+.center-img{display:block;margin-left:auto;margin-right:auto}
+.subscribe-btn{display:inline-block;padding:10px 16px;margin:5px;border-radius:8px;background:#333;color:white;text-decoration:none;font-weight:bold}
+hr{border:0;border-top:1px solid var(--line);margin:16px 0}
+details{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin-top:10px}
+summary{cursor:pointer;font-weight:600;color:var(--accent);user-select:none}
+details[open] summary{margin-bottom:8px;border-bottom:1px solid var(--line);padding-bottom:8px}
 </style>
 
 <link rel="icon" href="https://www.google.com/s2/favicons?domain=www.stalker-game.com&sz=64">
@@ -92,67 +110,190 @@ details[open] summary {
 
 <div>Вітаю, сталкере! Якщо ви з тих, хто досі обмінює купони на можливість зібрати всі доступні файли архіву НДІЧАЗ (електронну версію), тоді цей інструмент стане вам в пригоді.
 <br><br>
-Вкажіть, які картки в вас є і який ваш бюджет, А система оцінить ваші шанси зібрати повну колекцію.
+Вкажіть, які картки або предмети в вас є і який ваш бюджет, а система оцінить ваші шанси зібрати повну колекцію.
 </div>
 <br>
 
-<section class="panel">
-<h2>Вже зібрано:</h2>
-<p class="hint">В дужках вказана ймовірність випадіння</p> 
-<br>
-<div class="sliders">
-<div class="slider-row"><div><label for="common">Звичайні (67%)</label><input id="common" class="common" type="range" min="0" max="18" value="0"></div><div class="count" id="commonCount">0 / 18</div></div>
-<div class="slider-row"><div><label for="rare">Рідкісні (20%)</label><input id="rare" class="rare" type="range" min="0" max="13" value="0"></div><div class="count" id="rareCount">0 / 13</div></div>
-<div class="slider-row"><div><label for="epi">Епічні (10%)</label><input id="epi" class="epic" type="range" min="0" max="10" value="0"></div><div class="count" id="epiCount">0 / 10</div></div>
-<div class="slider-row"><div><label for="leg">Легендарні (3%)</label><input id="leg" class="legendary" type="range" min="0" max="7" value="0"></div><div class="count" id="legCount">0 / 7</div></div>
-
+<div class="tabs" role="tablist" aria-label="Вибір розділу">
+  <button id="tabBtnCards" class="tab-btn" type="button" role="tab" aria-selected="true" aria-controls="tabPanelCards">Картки</button>
+  <button id="tabBtnItems" class="tab-btn" type="button" role="tab" aria-selected="false" aria-controls="tabPanelItems">Предмети</button>
+  <button id="tabBtnCustom" class="tab-btn" type="button" role="tab" aria-selected="false" aria-controls="tabPanelCustom">Своя колекція</button>
 </div>
 
+<!-- ВКЛАДКА 1: КАРТКИ -->
+<div id="tabPanelCards" class="tab-panel" role="tabpanel" aria-labelledby="tabBtnCards">
+  <section class="panel">
+    <h2>Вже зібрано:</h2>
+    <p class="hint">В дужках вказана ймовірність випадіння</p>
+    <br>
+    <div class="sliders">
+      <div class="slider-row"><div><label for="cards-common">Звичайні (67%)</label><input id="cards-common" class="cards-common" type="range" min="0" max="18" value="0"></div><div class="count" id="cards-commonCount">0 / 18</div></div>
+      <div class="slider-row"><div><label for="cards-rare">Рідкісні (20%)</label><input id="cards-rare" class="cards-rare" type="range" min="0" max="13" value="0"></div><div class="count" id="cards-rareCount">0 / 13</div></div>
+      <div class="slider-row"><div><label for="cards-epi">Епічні (10%)</label><input id="cards-epi" class="cards-epic" type="range" min="0" max="10" value="0"></div><div class="count" id="cards-epiCount">0 / 10</div></div>
+      <div class="slider-row"><div><label for="cards-leg">Легендарні (3%)</label><input id="cards-leg" class="cards-legendary" type="range" min="0" max="7" value="0"></div><div class="count" id="cards-legCount">0 / 7</div></div>
+    </div>
+    <div id="cards-collected" style="margin-top: 12px;">Зібрано: 0 / 48</div>
+  </section>
 
+  <section class="panel">
+    <h2>Бюджет:</h2>
+    <div class="inputs">
+      <input id="cards-budget" type="number" min="0" step="1" inputmode="numeric" placeholder="Введіть кількість купонів">
+    </div>
+    <p class="hint">Купівля - 20 купонів. Продаж дубліката - 5 купонів.</p>
+  </section>
 
-<div id="collected" style="margin-top: 12px;">Зібрано: 0 / 48</div>
-</section>
-
-<section class="panel">
-<h2>Бюджет:</h2>
-<div class="inputs">
-<!-- <label class="field">Ваш бюджет -->
-<input id="budget" type="number" min="0" step="1" inputmode="numeric" placeholder="Введіть кількість купонів">
-
-</label>
-<!-- ТИМЧАСОВО ПРИХОВАНІ ПОЛЯ ЦІН (розкоментуйте блок нижче, щоб повернути ручне введення)
-<label class="field">Ціна купівлі
-<input id="buy" type="number" min="1" step="1" inputmode="numeric" value="20">
-</label>
-<label class="field">Продаж дубліката
-<input id="sell" type="number" min="0" step="1" inputmode="numeric" value="5">
-</label>
--->
+  <section class="panel">
+    <h2>Ймовірність зібрати повну колекцію*</h2>
+    <p class="hint">*За умови, що ви кожного разу продаєте дублікати, а отримані гроші вкладаєте в нову покупку</p>
+    <p class="stats" id="cards-selectedInfo">Придбано штук: 0 · Ймовірність: 0.0%</p>
+    <div class="graph-wrap">
+      <svg id="cards-chart" viewBox="0 0 760 350" role="img" aria-label="Графік імовірності завершення колекції карток залежно від кількості купівель">
+        <g id="cards-plot"></g>
+      </svg>
+    </div>
+    <div class="small">Перетягуйте вертикальну лінію на графіку, щоб змінити кількість покупок. Бюджет перераховується автоматично.</div>
+    <br>
+    <h2>Прогнозована кількість покупок</h2>
+    <p class="stats" id="cards-newItemInfo">До отримання нової картки: <b>1 шт.</b> (20 купонів)</p>
+    <p class="stats" id="cards-meanInfo">До завершення колекції: <b>—</b></p>
+  </section>
 </div>
-<p class="hint">Купівля - 20 купонів. Продаж дубліката - 5 купонів.</p>
-</section>
 
+<!-- ВКЛАДКА 2: ПРЕДМЕТИ -->
+<div id="tabPanelItems" class="tab-panel" role="tabpanel" aria-labelledby="tabBtnItems" hidden>
+  <section class="panel">
+    <h2>Вже зібрано:</h2>
+    <p class="hint">В дужках вказана ймовірність випадіння</p>
+    <br>
+    <div class="sliders">
+      <div class="slider-row"><div><label for="items-common">Звичайні (53%)</label><input id="items-common" class="items-common" type="range" min="0" max="12" value="0"></div><div class="count" id="items-commonCount">0 / 12</div></div>
+      <div class="slider-row"><div><label for="items-uncommon">Незвичайні (20%)</label><input id="items-uncommon" class="items-uncommon" type="range" min="0" max="14" value="0"></div><div class="count" id="items-uncommonCount">0 / 14</div></div>
+      <div class="slider-row"><div><label for="items-rare">Рідкісні (15%)</label><input id="items-rare" class="items-rare" type="range" min="0" max="22" value="0"></div><div class="count" id="items-rareCount">0 / 22</div></div>
+      <div class="slider-row"><div><label for="items-epi">Епічні (9%)</label><input id="items-epi" class="items-epic" type="range" min="0" max="31" value="0"></div><div class="count" id="items-epiCount">0 / 31</div></div>
+      <div class="slider-row"><div><label for="items-leg">Легендарні (3%)</label><input id="items-leg" class="items-legendary" type="range" min="0" max="23" value="0"></div><div class="count" id="items-legCount">0 / 23</div></div>
+    </div>
+    <div id="items-collected" style="margin-top: 12px;">Зібрано: 0 / 102</div>
+  </section>
 
+  <section class="panel">
+    <h2>Бюджет:</h2>
+    <div class="inputs">
+      <input id="items-budget" type="number" min="0" step="1" inputmode="numeric" placeholder="Введіть кількість купонів">
+    </div>
+    <p class="hint">Купівля - 20 купонів. Продаж дубліката - 5 купонів.</p>
+  </section>
 
-
-<section class="panel">
-<h2>Ймовірність зібрати повну колекцію*</h2>
-<p class="hint">*За умови, що ви кожного разу продаєте дублікати, а отримані гроші вкладаєте в нову покупку</p>
-
-<p class="stats" id="selectedInfo">Куплено штук: 0 · Ймовірність: 0%</p>
-<div class="graph-wrap">
-<svg id="chart" viewBox="0 0 760 350" role="img" aria-label="Графік імовірності завершення колекції залежно від кількості купівель">
-<g id="plot"></g>
-</svg>
+  <section class="panel">
+    <h2>Ймовірність зібрати повну колекцію*</h2>
+    <p class="hint">*За умови, що ви кожного разу продаєте дублікати, а отримані гроші вкладаєте в нову покупку</p>
+    <p class="stats" id="items-selectedInfo">Придбано штук: 0 · Ймовірність: 0.0%</p>
+    <div class="graph-wrap">
+      <svg id="items-chart" viewBox="0 0 760 350" role="img" aria-label="Графік імовірності завершення колекції предметів залежно від кількості купівель">
+        <g id="items-plot"></g>
+      </svg>
+    </div>
+    <div class="small">Перетягуйте вертикальну лінію на графіку, щоб змінити кількість покупок. Бюджет перераховується автоматично.</div>
+    <br>
+    <h2>Прогнозована кількість покупок</h2>
+    <p class="stats" id="items-newItemInfo">До отримання нового предмета: <b>1 шт.</b> (20 купонів)</p>
+    <p class="stats" id="items-meanInfo">До завершення колекції: <b>—</b></p>
+  </section>
 </div>
-<div class="small">Перетягуйте вертикальну лінію на графіку, щоб змінити кількість покупок. Бюджет перераховується автоматично.</div>
-<br>
-<h2>Прогнозована кількість покупок</h2>
-<p class="stats" id="newItemInfo">До отримання нової картки: —</p>
-<p class="stats" id="meanInfo">До завершення колекції: —</p>
 
-</section>
+<!-- ВКЛАДКА 3: СВОЯ КОЛЕКЦІЯ -->
+<div id="tabPanelCustom" class="tab-panel" role="tabpanel" aria-labelledby="tabBtnCustom" hidden>
+  <section class="panel">
+    <h2>Налаштування колекції:</h2>
+    <p class="hint">Додайте до 8 категорій, вкажіть кількість предметів у кожній та цілі відсотки шансу випадіння (можна залишити частину або всі поля шансів пустими для авторозрахунку).</p>
+    <br>
+    <div class="cat-toolbar">
+      <div class="cat-counter" id="custom-catSummary">Категорій: 1 / 8 · Всього предметів: 10</div>
+      <div class="btn-group">
+        <button id="custom-removeCatBtn" class="btn-sm" type="button" title="Видалити останню категорію">−</button>
+        <button id="custom-addCatBtn" class="btn-sm" type="button" title="Додати нову категорію">+</button>
+      </div>
+    </div>
 
+    <div id="custom-catList" class="custom-cat-list"></div>
+
+    <div id="custom-chanceNotice" class="notice-box" hidden>
+      <div id="custom-chanceNoticeText"></div>
+      <div class="notice-actions">
+        <button id="custom-editChanceBtn" class="btn-sm btn-secondary" type="button">Відредагувати</button>
+        <button id="custom-normalizeChanceBtn" class="btn-sm btn-accent" type="button">Нормалізувати</button>
+      </div>
+    </div>
+
+    <div class="btn-group" style="margin-top:14px">
+      <button id="custom-confirmBtn" type="button">Затвердити</button>
+    </div>
+  </section>
+
+  <section id="custom-collectedPanel" class="panel subpanel-disabled">
+    <h2>Вже зібрано:</h2>
+    <p class="hint" id="custom-collectedHint">Спочатку налаштуйте та затвердіть колекцію вище.</p>
+    <br>
+    <div id="custom-sliders" class="sliders"></div>
+    <div id="custom-collected" style="margin-top: 12px;">Зібрано: 0 / 10</div>
+  </section>
+
+  <section id="custom-budgetPanel" class="panel subpanel-disabled">
+    <h2>Бюджет та умови купівлі:</h2>
+    <div class="inputs">
+      <label class="field">Ваш бюджет
+        <input id="custom-budget" type="number" min="0" step="1" inputmode="numeric" placeholder="Введіть бюджет">
+      </label>
+      <label class="field">Ціна купівлі
+        <input id="custom-buy" type="number" min="1" step="1" inputmode="numeric" value="20" placeholder="Ціна купівлі">
+      </label>
+    </div>
+
+    <div class="radio-group" role="radiogroup" aria-label="Кількість шансів за ціну купівлі">
+      <label class="radio-option">
+        <input type="radio" name="custom-buyMode" id="custom-modeSingle" value="single" checked>
+        <span>1 шанс</span>
+      </label>
+      <label class="radio-option">
+        <input type="radio" name="custom-buyMode" id="custom-modePack" value="pack">
+        <span>Інше</span>
+      </label>
+    </div>
+
+    <div class="inputs">
+      <label class="field">Шансів / витягувань за цю ціну
+        <input id="custom-packSize" type="number" min="2" step="1" inputmode="numeric" value="10" placeholder="Кількість шансів" disabled>
+      </label>
+      <label class="field">Продаж дубліката (якщо не вказано — 0)
+        <input id="custom-sell" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+      </label>
+    </div>
+
+    <p class="hint" id="custom-economyHint">Якщо ціна продажу дубліката порожня, дублікати не продаються (0). У режимі «Інше» купівля йде паками, а продаж дубліката недоступний.</p>
+
+    <div class="btn-group" style="margin-top:14px">
+      <button id="custom-calcBtn" type="button">Розрахувати</button>
+    </div>
+  </section>
+
+  <section id="custom-resultPanel" class="panel subpanel-disabled">
+    <h2>Ймовірність зібрати повну колекцію*</h2>
+    <p class="hint" id="custom-graphHint">*Натисніть «Розрахувати» після налаштування колекції. Далі повзунки та графік оновлюватимуться автоматично.</p>
+    <p class="stats" id="custom-selectedInfo">Придбано штук: 0 · Ймовірність: 0.0%</p>
+    <div class="graph-wrap">
+      <svg id="custom-chart" viewBox="0 0 760 350" role="img" aria-label="Графік імовірності завершення власної колекції">
+        <g id="custom-plot"></g>
+      </svg>
+    </div>
+    <div class="small">Перетягуйте вертикальну лінію на графіку, щоб змінити кількість покупок. Бюджет перераховується автоматично.</div>
+    <br>
+    <h2>Прогнозована кількість покупок</h2>
+    <p class="stats" id="custom-newItemInfo">До отримання нового предмета: <b>—</b></p>
+    <p class="stats" id="custom-meanInfo">До завершення колекції: <b>—</b></p>
+  </section>
+</div>
+
+<!-- СПІЛЬНІ СЕКЦІЇ -->
 <section class="panel">
 <h2>Інформація</h2>
 <p class="hint">Оцінка побудована методом Монте-Карло (6000 симуляцій). Після завершення колекції калькулятор продовжує враховувати наступні купівлі та продаж дублікатів.<br><br>
@@ -174,22 +315,24 @@ details[open] summary {
 <div class="small">*Заходьте, реєструйтесь, додавайтесь в друзі. При реєстрації в полі «Хто тебе запросив?» вкажіть <b>E.Gregor</b><br>Також напишіть свої враження чи/та зауваження щодо цього інструменту</div>
 <hr>
 <details>
-  <summary><b>v1.1</b></summary>
-  <p><b>v1.1</b>
-    <ul>
+  <summary><b>v1.2a</b></summary>
+<p><b>v1.2a</b></p>
+  <ul>
+    <li>Калькулятор запа'мятовує останні введені дані, не потрібно встановлювати положення повзунків «з нуля» (але симуляція при кожному запуску оновлюється, тому суми можуть дещо відрізнятися) </li>
+    <li>Доданий калькулятор ПРЕДМЕТІВ</li>
+    <li>Доданий калькулятор ВЛАСНОЇ КОЛЕКЦІЇ. Дозволяє вирахувати шанс випадіння колекційних предметів в рамках інших проектів.</li>
+    <li>ТРИВАЄ ТЕСТУВАННЯ</li>
+  </ul>  
+<p><b>v1.1</b></p>
+  <ul>
     <li>Прибрана кнопка розрахунку бюджету за середнім значенням (дані відображаються в дужках)</li>
     <li>Прибрані зайві поля: ціна купівлі, ціна продажу</li>
     <li>Доданий прогноз отримати новий предмет: кількість покупок і необхідний бюджет</li>
     <li>Дрібні виправлення тексту, дизайну</li>
-    </ul>
-  </p>
+  </ul>
   <p><b>v1.0 </b>Базовий функціонал</p>
 </details>
-
-
-
 </section>
-
 
 <!-- Пасхалка -->
 <button id="eggTrigger" type="button" aria-label="Пасхалка">🥚</button>
@@ -371,261 +514,1164 @@ AAAAAAAAAAAAAv85778777777671A_AAAAAAAAAA
 })();
 </script>
 
-
-
-</main>
 <script>
 (() => {
 'use strict';
+
 // =========================================================
-// ФІКСОВАНІ ЦІНИ (змінити за потреби)
+// БАЗОВІ КОНСТАНТИ ТА СХОВИЩЕ
 // =========================================================
-const DEFAULT_BUY = 20;   // Ціна купівлі
-const DEFAULT_SELL = 5;   // Ціна продажу дубліката
-// =========================================================
+const DEFAULT_BUY = 20;
+const DEFAULT_SELL = 5;
+const TRIALS = 6000;
+const MAX_DRAWS = 10000;
+const STORAGE_KEY = 'stalker_collector_calc_v3';
+
+const CUSTOM_PALETTE = [
+  '#b6c2d1', // 1 - світло-сірий
+  '#67baff', // 2 - голубий
+  '#e36bd5', // 3 - фуксія
+  '#f2555a', // 4 - яскраво-червоний
+  '#f2a340', // 5 - помаранчевий
+  '#6fd69b', // 6 - м'ятно-зелений
+  '#a985ff', // 7 - бузково-фіолетовий
+  '#ffd166'  // 8 - пісочно-жовтий
+];
 
 const $ = id => document.getElementById(id);
-const categoryDefs = [
-  {id:'leg', count:'legCount', total:7, p:.03},
-  {id:'epi', count:'epiCount', total:10, p:.10},
-  {id:'rare', count:'rareCount', total:13, p:.20},
-  {id:'common', count:'commonCount', total:18, p:.67}
-];
-const TRIALS = 6000;
-let trials = [];
-let completionSorted = [];
-let meanCompletion = 0;
-let selectedN = 0;
-let graphMax = 100;
-let valid = false;
-const chart = $('chart'), plot = $('plot');
-const W=760,H=350,L=54,R=18,T=18,B=48;
-const pw=W-L-R, ph=H-T-B;
-const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-const intValue = el => {
+const W = 760, H = 350, L = 54, R = 18, T = 18, B = 48;
+const pw = W - L - R, ph = H - T - B;
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+function intValue(el) {
   const v = Number(el.value);
   return Number.isFinite(v) ? Math.trunc(v) : NaN;
-};
-function settings(){
-  const buyEl = $('buy'), sellEl = $('sell');
-  const buy = buyEl ? intValue(buyEl) : DEFAULT_BUY;
-  const sell = sellEl ? intValue(sellEl) : DEFAULT_SELL;
-  const budgetText = $('budget').value.trim();
-  const budget = budgetText === '' ? null : intValue($('budget'));
-  return {buy, sell, budget, budgetText};
 }
-function collected(){
-  return categoryDefs.map(c=>clamp(intValue($(c.id)),0,c.total));
-}
-function simulate(){
-  const have=collected();
-  const {buy,sell}=settings();
-  if(!Number.isInteger(buy)||buy<=0||!Number.isInteger(sell)||sell<0||sell>=buy){
-    valid=false; trials=[]; completionSorted=[]; renderInvalid(); return;
+
+function loadSavedState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === 'object' ? parsed : {};
+  } catch {
+    return {};
   }
-  valid=true;
-  trials=[];
-  completionSorted=[];
-  let newItemDrawSum = 0;
-  let newItemSamples = 0;
-  const netDuplicate=buy-sell;
-  for(let t=0;t<TRIALS;t++){
-    const missing=categoryDefs.map((c,i)=>c.total-have[i]);
-    let left=missing.reduce((a,b)=>a+b,0);
-    let cashSpent=0;
-    const thresholds=[];
-    let draws=0;
-    let firstNewDraw=0;
-    while(left>0 && draws<10000){
-      const r=Math.random();
-      let category;
-      if(r<.03) category=0;
-      else if(r<.13) category=1;
-      else if(r<.33) category=2;
-      else category=3;
-      const def=categoryDefs[category];
-      const isNew=missing[category]>0 && Math.random()<missing[category]/def.total;
-      draws++;
-      thresholds.push(cashSpent+buy);
-      if(isNew){
-        if(firstNewDraw===0) firstNewDraw=draws;
-        missing[category]--;left--;cashSpent+=buy;
+}
+
+const savedAll = loadSavedState();
+
+function persistAll() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(savedAll));
+  } catch {
+    // Ігноруємо обмеження localStorage у закритому режимі
+  }
+}
+
+// Метод найбільших залишків (Гамільтона) для приведення ваг до цілих відсотків із сумою targetSum
+function distributeIntegers(weights, targetSum) {
+  const n = weights.length;
+  if (n === 0 || targetSum <= 0) return new Array(n).fill(0);
+
+  const safeWeights = weights.map(w => (Number.isFinite(w) && w > 0 ? w : 0));
+  const totalWeight = safeWeights.reduce((a, b) => a + b, 0);
+
+  const effective = totalWeight > 0 ? safeWeights : new Array(n).fill(1);
+  const sum = effective.reduce((a, b) => a + b, 0);
+
+  const items = effective.map((w, idx) => {
+    const exact = (w / sum) * targetSum;
+    const floor = Math.floor(exact);
+    return { idx, floor, rem: exact - floor };
+  });
+
+  let remaining = targetSum - items.reduce((a, it) => a + it.floor, 0);
+  const byRemainder = [...items].sort((a, b) => (b.rem - a.rem) || (a.idx - b.idx));
+  for (let i = 0; i < remaining; i++) {
+    byRemainder[i % n].floor += 1;
+  }
+
+  const res = new Array(n);
+  items.forEach(it => { res[it.idx] = it.floor; });
+  return res;
+}
+
+// =========================================================
+// ГЕНЕРАТОР SVG-ГРАФІКА
+// =========================================================
+function drawProbabilityChart(plotEl, state, probabilityFn) {
+  const meanX = Math.ceil(state.meanCompletion);
+  state.graphMax = Math.max(
+    100,
+    Math.ceil(state.meanCompletion * 1.8),
+    state.selectedN + 20,
+    Math.ceil(meanX * 1.5)
+  );
+  state.graphMax = Math.min(state.graphMax, MAX_DRAWS);
+
+  const ticks = [0, 25, 50, 75, 100];
+  let s = '';
+  ticks.forEach(p => {
+    const y = T + (1 - p / 100) * ph;
+    s += `<line class="gridline" x1="${L}" y1="${y}" x2="${W - R}" y2="${y}"/>`;
+    s += `<text class="tick" x="${L - 10}" y="${y + 4}" text-anchor="end">${p}%</text>`;
+  });
+
+  const xTicks = 5;
+  for (let i = 0; i <= xTicks; i++) {
+    const n = Math.round(state.graphMax * i / xTicks);
+    const x = L + (n / state.graphMax) * pw;
+    s += `<line class="gridline" x1="${x}" y1="${T}" x2="${x}" y2="${H - B}"/>`;
+    s += `<text class="tick" x="${x}" y="${H - B + 19}" text-anchor="middle">${n}</text>`;
+  }
+
+  s += `<line class="axis" x1="${L}" y1="${T}" x2="${L}" y2="${H - B}"/>`;
+  s += `<line class="axis" x1="${L}" y1="${H - B}" x2="${W - R}" y2="${H - B}"/>`;
+  s += `<text class="axis-title" x="${L + pw / 2}" y="${H - 8}" text-anchor="middle">Придбано штук</text>`;
+  s += `<text class="axis-title" transform="translate(14 ${T + ph / 2}) rotate(-90)" text-anchor="middle">Ймовірність</text>`;
+
+  let path = '';
+  const samples = 100;
+  for (let i = 0; i <= samples; i++) {
+    const n = Math.round(state.graphMax * i / samples);
+    const x = L + (n / state.graphMax) * pw;
+    const y = T + (1 - probabilityFn(n)) * ph;
+    path += (i === 0 ? 'M' : 'L') + x.toFixed(2) + ' ' + y.toFixed(2) + ' ';
+  }
+  s += `<path class="curve" d="${path}"/>`;
+
+  const clampedN = clamp(state.selectedN, 0, state.graphMax);
+  const mx = L + (clampedN / state.graphMax) * pw;
+  const mp = probabilityFn(state.selectedN);
+  const my = T + (1 - mp) * ph;
+  s += `<line class="marker" x1="${mx}" y1="${T}" x2="${mx}" y2="${H - B}"/>`;
+  s += `<circle class="marker-dot" cx="${mx}" cy="${my}" r="5"/>`;
+  s += `<text class="marker-label" x="${clamp(mx + 7, L + 4, W - R - 72)}" y="${T + 13}">${state.selectedN} шт.</text>`;
+  plotEl.innerHTML = s;
+  return mp;
+}
+
+// =========================================================
+// ВКЛАДКИ 1 І 2: ФІКСОВАНІ КОЛЕКЦІЇ (КАРТКИ / ПРЕДМЕТИ)
+// =========================================================
+function createFixedTab(config) {
+  const { prefix, newItemNoun, categories, pickCategory } = config;
+  const budgetEl = $(`${prefix}-budget`);
+  const collectedEl = $(`${prefix}-collected`);
+  const selectedInfoEl = $(`${prefix}-selectedInfo`);
+  const newItemInfoEl = $(`${prefix}-newItemInfo`);
+  const meanInfoEl = $(`${prefix}-meanInfo`);
+  const chartEl = $(`${prefix}-chart`);
+  const plotEl = $(`${prefix}-plot`);
+
+  const state = {
+    trials: [],
+    completionSorted: [],
+    meanCompletion: 0,
+    selectedN: 0,
+    graphMax: 100,
+    valid: false,
+    simulated: false,
+    dragging: false
+  };
+
+  // Відновлення збереженого стану вкладки
+  const saved = savedAll[prefix];
+  if (saved && typeof saved === 'object') {
+    if (Array.isArray(saved.values)) {
+      categories.forEach((c, idx) => {
+        if (Number.isFinite(saved.values[idx])) {
+          $(c.id).value = String(clamp(Math.trunc(saved.values[idx]), 0, c.total));
+        }
+      });
+    }
+    if (typeof saved.budgetText === 'string') {
+      budgetEl.value = saved.budgetText;
+    }
+    if (Number.isFinite(saved.selectedN) && saved.selectedN >= 0) {
+      state.selectedN = Math.trunc(saved.selectedN);
+    }
+  }
+
+  function saveTabState() {
+    savedAll[prefix] = {
+      values: getCollected(),
+      budgetText: budgetEl.value,
+      selectedN: state.selectedN
+    };
+    persistAll();
+  }
+
+  function getSettings() {
+    const budgetText = budgetEl.value.trim();
+    const budget = budgetText === '' ? null : intValue(budgetEl);
+    return { buy: DEFAULT_BUY, sell: DEFAULT_SELL, budget, budgetText };
+  }
+
+  function getCollected() {
+    return categories.map(c => clamp(intValue($(c.id)), 0, c.total));
+  }
+
+  function updateCountLabels() {
+    let currentTotal = 0;
+    let maxTotal = 0;
+    categories.forEach(c => {
+      const val = clamp(intValue($(c.id)), 0, c.total);
+      $(c.count).textContent = `${val} / ${c.total}`;
+      currentTotal += val;
+      maxTotal += c.total;
+    });
+    collectedEl.textContent = `Зібрано: ${currentTotal} / ${maxTotal}`;
+  }
+
+  function requiredBudget(n) {
+    const { buy, sell } = getSettings();
+    if (n <= 0) return 0;
+
+    const base = buy + (n - 1) * (buy - sell);
+    const remaining = getCollected().reduce((sum, val, i) => sum + (categories[i].total - val), 0);
+
+    if (sell <= 0 || remaining <= 1) return base;
+
+    let total = 0;
+    for (const tr of state.trials) {
+      if (n <= tr.draws) total += tr.thresholds[n - 1];
+      else total += tr.completionBudget + buy + (n - tr.draws - 1) * (buy - sell);
+    }
+    const avg = total / TRIALS;
+    if (avg <= base) return base;
+
+    const maxNewAffectingBudget = Math.min(remaining - 1, n - 1);
+    const k = Math.min(maxNewAffectingBudget, Math.round((avg - base) / sell));
+    return base + k * sell;
+  }
+
+  function averageAffordable(budget) {
+    const { buy } = getSettings();
+    if (!Number.isFinite(budget) || budget < buy) return 0;
+
+    let lo = 1;
+    let hi = MAX_DRAWS;
+    while (lo < hi) {
+      const mid = (lo + hi + 1) >> 1;
+      if (requiredBudget(mid) <= budget) lo = mid;
+      else hi = mid - 1;
+    }
+    return lo;
+  }
+
+  function probability(n) {
+    if (n <= 0) return state.completionSorted[0] === 0 ? 1 : 0;
+    let lo = 0, hi = state.completionSorted.length;
+    while (lo < hi) {
+      const mid = (lo + hi) >> 1;
+      if (state.completionSorted[mid] <= n) lo = mid + 1;
+      else hi = mid;
+    }
+    return lo / TRIALS;
+  }
+
+  function render() {
+    if (!state.valid) return;
+    const mp = drawProbabilityChart(plotEl, state, probability);
+    selectedInfoEl.textContent = `Придбано штук: ${state.selectedN} · Ймовірність: ${(mp * 100).toFixed(1)}%`;
+
+    const meanDraws = Math.ceil(state.meanCompletion);
+    const meanBudget = requiredBudget(meanDraws);
+    meanInfoEl.innerHTML = `До завершення колекції: <b>${meanDraws} шт.</b> (${meanBudget} купонів)`;
+  }
+
+  function simulate({ preserveSelection = false } = {}) {
+    const have = getCollected();
+    const { buy, sell } = getSettings();
+
+    state.valid = true;
+    state.simulated = true;
+    state.trials = [];
+    state.completionSorted = [];
+    let newItemDrawSum = 0;
+    let newItemSamples = 0;
+    const netDuplicate = buy - sell;
+
+    for (let t = 0; t < TRIALS; t++) {
+      const missing = categories.map((c, i) => c.total - have[i]);
+      let left = missing.reduce((a, b) => a + b, 0);
+      let cashSpent = 0;
+      const thresholds = [];
+      let draws = 0;
+      let firstNewDraw = 0;
+
+      while (left > 0 && draws < MAX_DRAWS) {
+        const category = pickCategory(Math.random());
+        const def = categories[category];
+        const isNew = missing[category] > 0 && Math.random() < missing[category] / def.total;
+        draws++;
+        thresholds.push(cashSpent + buy);
+        if (isNew) {
+          if (firstNewDraw === 0) firstNewDraw = draws;
+          missing[category]--;
+          left--;
+          cashSpent += buy;
+        } else {
+          cashSpent += netDuplicate;
+        }
       }
-      else cashSpent+=netDuplicate;
+
+      const completionBudget = thresholds.length ? thresholds[thresholds.length - 1] : 0;
+      if (firstNewDraw > 0) {
+        newItemDrawSum += firstNewDraw;
+        newItemSamples++;
+      }
+      state.trials.push({ thresholds, draws, completionBudget, firstNewDraw });
+      state.completionSorted.push(draws);
     }
-    const completionBudget=thresholds.length ? thresholds[thresholds.length-1] : 0;
-    if(firstNewDraw>0){
-      newItemDrawSum+=firstNewDraw;
-      newItemSamples++;
+
+    state.completionSorted.sort((a, b) => a - b);
+    state.meanCompletion = state.completionSorted.reduce((a, b) => a + b, 0) / TRIALS;
+
+    const remainingItems = categories.reduce((sum, c, i) => sum + c.total - have[i], 0);
+    if (remainingItems === 0) {
+      newItemInfoEl.textContent = 'Ви зібрали повну колекцію. Вітаємо!';
+    } else if (newItemSamples > 0) {
+      const avgNewDraws = Math.ceil(newItemDrawSum / newItemSamples);
+      const avgNewBudget = buy + (avgNewDraws - 1) * (buy - sell);
+      newItemInfoEl.innerHTML = `До отримання ${newItemNoun}: <b>${avgNewDraws} шт.</b> (${avgNewBudget} купонів)`;
+    } else {
+      newItemInfoEl.textContent = `До отримання ${newItemNoun}: не вдалося оцінити`;
     }
-    trials.push({thresholds,draws,completionBudget,firstNewDraw});
-    completionSorted.push(draws);
+
+    updateCountLabels();
+
+    if (!preserveSelection) {
+      const { budget } = getSettings();
+      state.selectedN = (budget !== null && Number.isFinite(budget) && budget >= 0)
+        ? averageAffordable(budget)
+        : 0;
+    }
+
+    render();
+    saveTabState();
   }
-  completionSorted.sort((a,b)=>a-b);
-  meanCompletion=completionSorted.reduce((a,b)=>a+b,0)/TRIALS;
-  const remainingItems=categoryDefs.reduce((sum,c,i)=>sum+c.total-have[i],0);
-  if(remainingItems===0){
-    $('newItemInfo').textContent='Ви зібрали повну колекцію. Вітаємо!';
-  }else if(newItemSamples>0){
-    const avgNewDraws=Math.ceil(newItemDrawSum/newItemSamples);
-    const avgNewBudget=buy+(avgNewDraws-1)*(buy-sell);
-    $('newItemInfo').innerHTML=`До отримання нової картки: <b>${avgNewDraws} шт.</b> (${avgNewBudget} купонів)`;
-  }else{
-    $('newItemInfo').textContent='До отримання нової картки: не вдалося оцінити';
+
+  function setBudgetForSelection(n) {
+    const target = clamp(Math.round(n), 0, MAX_DRAWS);
+    const amount = requiredBudget(target);
+    budgetEl.value = String(amount);
+    state.selectedN = target;
+    render();
+    saveTabState();
   }
+
+  function graphNFromEvent(e) {
+    const rect = chartEl.getBoundingClientRect();
+    if (!rect.width) return state.selectedN;
+    const x = (e.clientX - rect.left) * (W / rect.width);
+    return clamp(Math.round((x - L) / pw * state.graphMax), 0, state.graphMax);
+  }
+
+  chartEl.addEventListener('pointerdown', e => {
+    if (!state.valid) return;
+    state.dragging = true;
+    chartEl.setPointerCapture(e.pointerId);
+    setBudgetForSelection(graphNFromEvent(e));
+    e.preventDefault();
+  });
+
+  chartEl.addEventListener('pointermove', e => {
+    if (!state.dragging) return;
+    setBudgetForSelection(graphNFromEvent(e));
+  });
+
+  chartEl.addEventListener('pointerup', () => { state.dragging = false; });
+  chartEl.addEventListener('pointercancel', () => { state.dragging = false; });
+
+  budgetEl.addEventListener('input', () => {
+    if (!state.valid) return;
+    const { budget, budgetText } = getSettings();
+    if (budgetText === '' || !Number.isFinite(budget) || budget < 0) {
+      state.selectedN = 0;
+      render();
+      saveTabState();
+      return;
+    }
+    state.selectedN = averageAffordable(budget);
+    render();
+    saveTabState();
+  });
+
+  categories.forEach(c => {
+    $(c.id).addEventListener('input', () => {
+      updateCountLabels();
+      simulate();
+    });
+  });
+
   updateCountLabels();
-  const currentBudget=settings().budget;
-  selectedN=(currentBudget!==null && Number.isFinite(currentBudget) && currentBudget>=0)
-    ? averageAffordable(currentBudget) : 0;
-  render();
-}
-function updateCountLabels(){
-  let currentTotal = 0;
-  let maxTotal = 0;
 
-  categoryDefs.forEach(c => {
-    const val = Number($(c.id).value);
-    $(c.count).textContent = `${val} / ${c.total}`;
-    currentTotal += val;
-    maxTotal += c.total;
+  return {
+    onActivate() {
+      if (!state.simulated) {
+        simulate({ preserveSelection: state.selectedN > 0 && budgetEl.value.trim() === '' });
+      } else {
+        render();
+      }
+    }
+  };
+}
+
+// =========================================================
+// ВКЛАДКА 3: СВОЯ КОЛЕКЦІЯ
+// =========================================================
+function createCustomTab() {
+  const catSummaryEl = $('custom-catSummary');
+  const addCatBtn = $('custom-addCatBtn');
+  const removeCatBtn = $('custom-removeCatBtn');
+  const catListEl = $('custom-catList');
+  const chanceNoticeEl = $('custom-chanceNotice');
+  const chanceNoticeTextEl = $('custom-chanceNoticeText');
+  const editChanceBtn = $('custom-editChanceBtn');
+  const normalizeChanceBtn = $('custom-normalizeChanceBtn');
+  const confirmBtn = $('custom-confirmBtn');
+
+  const collectedPanelEl = $('custom-collectedPanel');
+  const collectedHintEl = $('custom-collectedHint');
+  const slidersEl = $('custom-sliders');
+  const collectedEl = $('custom-collected');
+
+  const budgetPanelEl = $('custom-budgetPanel');
+  const budgetEl = $('custom-budget');
+  const buyEl = $('custom-buy');
+  const modeSingleEl = $('custom-modeSingle');
+  const modePackEl = $('custom-modePack');
+  const packSizeEl = $('custom-packSize');
+  const sellEl = $('custom-sell');
+  const calcBtn = $('custom-calcBtn');
+
+  const resultPanelEl = $('custom-resultPanel');
+  const graphHintEl = $('custom-graphHint');
+  const selectedInfoEl = $('custom-selectedInfo');
+  const newItemInfoEl = $('custom-newItemInfo');
+  const meanInfoEl = $('custom-meanInfo');
+  const chartEl = $('custom-chart');
+  const plotEl = $('custom-plot');
+
+  const state = {
+    categories: [
+      { max: 10, chanceText: '', collected: 0 }
+    ],
+    confirmed: false,
+    calculated: false,
+    valid: false,
+    trials: [],
+    completionSorted: [],
+    meanCompletion: 0,
+    selectedN: 0,
+    graphMax: 100,
+    dragging: false
+  };
+
+  // Відновлення збереженого стану 3-ї вкладки
+  const saved = savedAll.custom;
+  if (saved && typeof saved === 'object') {
+    if (Array.isArray(saved.categories) && saved.categories.length >= 1 && saved.categories.length <= 8) {
+      state.categories = saved.categories.map(c => ({
+        max: Number.isFinite(c.max) && c.max >= 1 ? Math.trunc(c.max) : 10,
+        chanceText: typeof c.chanceText === 'string' ? c.chanceText : '',
+        collected: Number.isFinite(c.collected) && c.collected >= 0 ? Math.trunc(c.collected) : 0
+      }));
+      state.categories.forEach(c => {
+        c.collected = clamp(c.collected, 0, c.max);
+      });
+    }
+    if (typeof saved.budgetText === 'string') budgetEl.value = saved.budgetText;
+    if (typeof saved.buyText === 'string' && saved.buyText !== '') buyEl.value = saved.buyText;
+    if (saved.buyMode === 'pack') {
+      modePackEl.checked = true;
+      modeSingleEl.checked = false;
+    } else {
+      modeSingleEl.checked = true;
+      modePackEl.checked = false;
+    }
+    if (typeof saved.packSizeText === 'string' && saved.packSizeText !== '') packSizeEl.value = saved.packSizeText;
+    if (typeof saved.sellText === 'string') sellEl.value = saved.sellText;
+    if (typeof saved.confirmed === 'boolean') state.confirmed = saved.confirmed;
+    if (typeof saved.calculated === 'boolean') state.calculated = saved.calculated;
+    if (Number.isFinite(saved.selectedN) && saved.selectedN >= 0) {
+      state.selectedN = Math.trunc(saved.selectedN);
+    }
+  }
+
+  function saveCustomState() {
+    savedAll.custom = {
+      categories: state.categories.map(c => ({
+        max: c.max,
+        chanceText: c.chanceText,
+        collected: c.collected
+      })),
+      budgetText: budgetEl.value,
+      buyText: buyEl.value,
+      buyMode: modePackEl.checked ? 'pack' : 'single',
+      packSizeText: packSizeEl.value,
+      sellText: sellEl.value,
+      confirmed: state.confirmed,
+      calculated: state.calculated,
+      selectedN: state.selectedN
+    };
+    persistAll();
+  }
+
+  function hideNotice() {
+    chanceNoticeEl.hidden = true;
+    chanceNoticeTextEl.textContent = '';
+  }
+
+  function showNotice(text, showNormalize = true) {
+    chanceNoticeTextEl.textContent = text;
+    normalizeChanceBtn.hidden = !showNormalize;
+    chanceNoticeEl.hidden = false;
+  }
+
+  function updateSummary() {
+    const totalItems = state.categories.reduce((s, c) => s + c.max, 0);
+    catSummaryEl.textContent = `Категорій: ${state.categories.length} / 8 · Всього предметів: ${totalItems}`;
+    addCatBtn.disabled = state.confirmed || state.categories.length >= 8;
+    removeCatBtn.disabled = state.confirmed || state.categories.length <= 1;
+  }
+
+  function syncEconomyModeUI() {
+    const isPack = modePackEl.checked;
+    packSizeEl.disabled = !state.confirmed || !isPack;
+    sellEl.disabled = !state.confirmed || isPack;
+  }
+
+  function syncPanelsLockUI() {
+    confirmBtn.textContent = state.confirmed ? 'Відредагувати' : 'Затвердити';
+    collectedPanelEl.classList.toggle('subpanel-disabled', !state.confirmed);
+    budgetPanelEl.classList.toggle('subpanel-disabled', !state.confirmed);
+    resultPanelEl.classList.toggle('subpanel-disabled', !state.confirmed || !state.calculated);
+
+    collectedHintEl.textContent = state.confirmed
+      ? 'Перетягуйте повзунки, щоб вказати вже зібрані предмети.'
+      : 'Спочатку налаштуйте та затвердіть колекцію вище.';
+
+    budgetEl.disabled = !state.confirmed;
+    buyEl.disabled = !state.confirmed;
+    modeSingleEl.disabled = !state.confirmed;
+    modePackEl.disabled = !state.confirmed;
+    calcBtn.disabled = !state.confirmed;
+    syncEconomyModeUI();
+  }
+
+  function renderCategoryBuilders() {
+    catListEl.innerHTML = '';
+    state.categories.forEach((cat, idx) => {
+      const color = CUSTOM_PALETTE[idx % CUSTOM_PALETTE.length];
+      const row = document.createElement('div');
+      row.className = 'custom-cat-row';
+      row.innerHTML = `
+        <div class="cat-badge">
+          <span class="cat-dot" style="background:${color}"></span>
+          <span>Категорія ${idx + 1}</span>
+        </div>
+        <label class="field">Кількість (макс.)
+          <input type="number" min="1" step="1" inputmode="numeric" value="${cat.max}" ${state.confirmed ? 'disabled' : ''}>
+        </label>
+        <label class="field">Шанс (%)
+          <input type="number" min="0" max="100" step="1" inputmode="numeric" placeholder="Авто" value="${cat.chanceText}" ${state.confirmed ? 'disabled' : ''}>
+        </label>
+      `;
+
+      const [maxInput, chanceInput] = row.querySelectorAll('input');
+
+      maxInput.addEventListener('input', () => {
+        const raw = Number(maxInput.value);
+        const val = Number.isFinite(raw) && raw >= 1 ? Math.trunc(raw) : 1;
+        cat.max = val;
+        cat.collected = clamp(cat.collected, 0, val);
+        hideNotice();
+        updateSummary();
+        renderSliders();
+        saveCustomState();
+      });
+
+      maxInput.addEventListener('blur', () => {
+        maxInput.value = String(cat.max);
+      });
+
+      chanceInput.addEventListener('input', () => {
+        cat.chanceText = chanceInput.value.trim();
+        hideNotice();
+        saveCustomState();
+      });
+
+      catListEl.appendChild(row);
+    });
+
+    updateSummary();
+  }
+
+  function updateCollectedLabel() {
+    const currentTotal = state.categories.reduce((s, c) => s + c.collected, 0);
+    const maxTotal = state.categories.reduce((s, c) => s + c.max, 0);
+    collectedEl.textContent = `Зібрано: ${currentTotal} / ${maxTotal}`;
+  }
+
+  function renderSliders() {
+    slidersEl.innerHTML = '';
+    state.categories.forEach((cat, idx) => {
+      const color = CUSTOM_PALETTE[idx % CUSTOM_PALETTE.length];
+      const chanceLabel = cat.chanceText !== '' ? ` (${cat.chanceText}%)` : '';
+      const row = document.createElement('div');
+      row.className = 'slider-row';
+      row.innerHTML = `
+        <div>
+          <label for="custom-slider-${idx}">
+            <span class="cat-dot" style="background:${color}"></span>
+            <span>Категорія ${idx + 1}${chanceLabel}</span>
+          </label>
+          <input id="custom-slider-${idx}" type="range" min="0" max="${cat.max}" value="${cat.collected}" style="accent-color:${color}" ${state.confirmed ? '' : 'disabled'}>
+        </div>
+        <div class="count" id="custom-count-${idx}">${cat.collected} / ${cat.max}</div>
+      `;
+
+      const slider = row.querySelector('input[type=range]');
+      const countEl = row.querySelector('.count');
+
+      slider.addEventListener('input', () => {
+        cat.collected = clamp(intValue(slider), 0, cat.max);
+        countEl.textContent = `${cat.collected} / ${cat.max}`;
+        updateCollectedLabel();
+        saveCustomState();
+        if (state.confirmed && state.calculated) {
+          simulate({ preserveSelection: false });
+        }
+      });
+
+      slidersEl.appendChild(row);
+    });
+
+    updateCollectedLabel();
+  }
+
+  function evaluateChances() {
+    const parsed = state.categories.map(c => {
+      if (c.chanceText === '') return null;
+      const num = Number(c.chanceText);
+      if (!Number.isFinite(num) || num < 0 || !Number.isInteger(num)) return NaN;
+      return num;
+    });
+
+    if (parsed.some(v => Number.isNaN(v))) {
+      return {
+        ok: false,
+        canNormalize: false,
+        message: 'Шанси мають бути цілими невід’ємними числами (у відсотках).'
+      };
+    }
+
+    const emptyIndices = [];
+    let filledSum = 0;
+    parsed.forEach((val, idx) => {
+      if (val === null) emptyIndices.push(idx);
+      else filledSum += val;
+    });
+
+    // 1. Усі поля пусті -> пропорційно до максимуму в категорії
+    if (emptyIndices.length === state.categories.length) {
+      const weights = state.categories.map(c => c.max);
+      const dist = distributeIntegers(weights, 100);
+      return { ok: true, chances: dist };
+    }
+
+    // 2. Частково пусті поля
+    if (emptyIndices.length > 0) {
+      const rem = 100 - filledSum;
+      if (rem < 0) {
+        return {
+          ok: false,
+          canNormalize: true,
+          message: `Сума введених шансів становить ${filledSum}%, що перевищує 100%. Відредагуйте вручну або натисніть «Нормалізувати».`
+        };
+      }
+      const emptyShare = distributeIntegers(new Array(emptyIndices.length).fill(1), rem);
+      const result = [...parsed];
+      emptyIndices.forEach((catIdx, i) => {
+        result[catIdx] = emptyShare[i];
+      });
+      return { ok: true, chances: result };
+    }
+
+    // 3. Усі поля заповнені
+    if (filledSum !== 100) {
+      return {
+        ok: false,
+        canNormalize: filledSum > 0,
+        message: `Сума шансів зараз дорівнює ${filledSum}%, а має бути 100%. Відредагуйте вручну або натисніть «Нормалізувати».`
+      };
+    }
+
+    return { ok: true, chances: parsed };
+  }
+
+  function normalizeChances() {
+    const filled = state.categories.map(c => {
+      if (c.chanceText === '') return null;
+      const n = Number(c.chanceText);
+      return Number.isFinite(n) && n >= 0 ? n : 0;
+    });
+
+    let weights;
+    if (filled.every(v => v === null)) {
+      weights = state.categories.map(c => c.max);
+    } else {
+      weights = filled.map(v => (v === null ? 0 : v));
+    }
+
+    const normalized = distributeIntegers(weights, 100);
+    state.categories.forEach((c, idx) => {
+      c.chanceText = String(normalized[idx]);
+    });
+
+    hideNotice();
+    renderCategoryBuilders();
+    renderSliders();
+    saveCustomState();
+  }
+
+  function getEconomySettings() {
+    const buy = intValue(buyEl);
+    const isPack = modePackEl.checked;
+    const packSize = isPack ? intValue(packSizeEl) : 1;
+    const sellText = sellEl.value.trim();
+    const sell = isPack ? 0 : (sellText === '' ? 0 : intValue(sellEl));
+    const budgetText = budgetEl.value.trim();
+    const budget = budgetText === '' ? null : intValue(budgetEl);
+
+    return { buy, isPack, packSize, sell, budget, budgetText };
+  }
+
+  function validateEconomy() {
+    const { buy, isPack, packSize, sell } = getEconomySettings();
+    if (!Number.isInteger(buy) || buy <= 0) {
+      return 'Ціна купівлі має бути цілим числом більшим за 0.';
+    }
+    if (isPack) {
+      if (!Number.isInteger(packSize) || packSize < 2) {
+        return 'Кількість шансів у режимі «Інше» має бути цілим числом від 2 і більше.';
+      }
+    } else {
+      if (!Number.isInteger(sell) || sell < 0 || sell >= buy) {
+        return 'Ціна продажу дубліката має бути не меншою за 0 і меншою за ціну купівлі.';
+      }
+    }
+    return null;
+  }
+
+  // Зворотний перерахунок: кількість шансів n -> потрібний бюджет
+  function requiredBudget(n) {
+    const { buy, isPack, packSize, sell } = getEconomySettings();
+    if (n <= 0) return 0;
+
+    // У режимі паків оплата відбувається лише цілими паками
+    if (isPack) {
+      return Math.ceil(n / packSize) * buy;
+    }
+
+    const base = buy + (n - 1) * (buy - sell);
+    const remaining = state.categories.reduce((sum, c) => sum + (c.max - c.collected), 0);
+
+    if (sell <= 0 || remaining <= 1) return base;
+
+    let total = 0;
+    for (const tr of state.trials) {
+      if (n <= tr.draws) total += tr.thresholds[n - 1];
+      else total += tr.completionBudget + buy + (n - tr.draws - 1) * (buy - sell);
+    }
+    const avg = total / TRIALS;
+    if (avg <= base) return base;
+
+    const maxNewAffectingBudget = Math.min(remaining - 1, n - 1);
+    const k = Math.min(maxNewAffectingBudget, Math.round((avg - base) / sell));
+    return base + k * sell;
+  }
+
+  // Прямий перерахунок: бюджет -> доступна кількість шансів
+  function averageAffordable(budget) {
+    const { buy, isPack, packSize } = getEconomySettings();
+    if (!Number.isFinite(budget) || budget < buy) return 0;
+
+    if (isPack) {
+      const packs = Math.floor(budget / buy);
+      return clamp(packs * packSize, 0, MAX_DRAWS);
+    }
+
+    let lo = 1;
+    let hi = MAX_DRAWS;
+    while (lo < hi) {
+      const mid = (lo + hi + 1) >> 1;
+      if (requiredBudget(mid) <= budget) lo = mid;
+      else hi = mid - 1;
+    }
+    return lo;
+  }
+
+  function probability(n) {
+    if (n <= 0) return state.completionSorted[0] === 0 ? 1 : 0;
+    let lo = 0, hi = state.completionSorted.length;
+    while (lo < hi) {
+      const mid = (lo + hi) >> 1;
+      if (state.completionSorted[mid] <= n) lo = mid + 1;
+      else hi = mid;
+    }
+    return lo / TRIALS;
+  }
+
+  function formatBudgetDetails(draws, budgetAmount) {
+    const { isPack, packSize } = getEconomySettings();
+    if (isPack) {
+      const packs = Math.ceil(draws / packSize);
+      return `<b>${draws} шт.</b> (${budgetAmount} купонів · ${packs} пак.)`;
+    }
+    return `<b>${draws} шт.</b> (${budgetAmount} купонів)`;
+  }
+
+  function renderChartAndStats() {
+    if (!state.valid || !state.calculated) return;
+    const mp = drawProbabilityChart(plotEl, state, probability);
+    selectedInfoEl.textContent = `Придбано штук: ${state.selectedN} · Ймовірність: ${(mp * 100).toFixed(1)}%`;
+
+    const meanDraws = Math.ceil(state.meanCompletion);
+    const meanBudget = requiredBudget(meanDraws);
+    meanInfoEl.innerHTML = `До завершення колекції: ${formatBudgetDetails(meanDraws, meanBudget)}`;
+  }
+
+  function simulate({ preserveSelection = false } = {}) {
+    const econError = validateEconomy();
+    if (econError) {
+      state.valid = false;
+      plotEl.innerHTML = '';
+      selectedInfoEl.textContent = econError;
+      newItemInfoEl.innerHTML = 'До отримання нового предмета: <b>—</b>';
+      meanInfoEl.innerHTML = 'До завершення колекції: <b>—</b>';
+      return;
+    }
+
+    const chanceCheck = evaluateChances();
+    if (!chanceCheck.ok) {
+      state.valid = false;
+      return;
+    }
+
+    const probs = chanceCheck.chances.map(p => p / 100);
+    const cumulative = [];
+    let acc = 0;
+    for (let i = 0; i < probs.length; i++) {
+      acc += probs[i];
+      cumulative.push(i === probs.length - 1 ? 1 : acc);
+    }
+
+    const { buy, isPack, packSize, sell } = getEconomySettings();
+    const unitBuy = isPack ? buy / packSize : buy;
+    const netDuplicate = isPack ? unitBuy : (buy - sell);
+
+    state.valid = true;
+    state.calculated = true;
+    state.trials = [];
+    state.completionSorted = [];
+    let newItemDrawSum = 0;
+    let newItemSamples = 0;
+
+    for (let t = 0; t < TRIALS; t++) {
+      const missing = state.categories.map(c => c.max - c.collected);
+      let left = missing.reduce((a, b) => a + b, 0);
+      let cashSpent = 0;
+      const thresholds = [];
+      let draws = 0;
+      let firstNewDraw = 0;
+
+      while (left > 0 && draws < MAX_DRAWS) {
+        const r = Math.random();
+        let catIdx = 0;
+        while (catIdx < cumulative.length - 1 && r >= cumulative[catIdx]) {
+          catIdx++;
+        }
+
+        const cat = state.categories[catIdx];
+        const isNew = missing[catIdx] > 0 && Math.random() < missing[catIdx] / cat.max;
+        draws++;
+        thresholds.push(cashSpent + unitBuy);
+
+        if (isNew) {
+          if (firstNewDraw === 0) firstNewDraw = draws;
+          missing[catIdx]--;
+          left--;
+          cashSpent += unitBuy;
+        } else {
+          cashSpent += netDuplicate;
+        }
+      }
+
+      const completionBudget = thresholds.length ? thresholds[thresholds.length - 1] : 0;
+      if (firstNewDraw > 0) {
+        newItemDrawSum += firstNewDraw;
+        newItemSamples++;
+      }
+      state.trials.push({ thresholds, draws, completionBudget, firstNewDraw });
+      state.completionSorted.push(draws);
+    }
+
+    state.completionSorted.sort((a, b) => a - b);
+    state.meanCompletion = state.completionSorted.reduce((a, b) => a + b, 0) / TRIALS;
+
+    const remainingItems = state.categories.reduce((sum, c) => sum + (c.max - c.collected), 0);
+    if (remainingItems === 0) {
+      newItemInfoEl.textContent = 'Ви зібрали повну колекцію. Вітаємо!';
+    } else if (newItemSamples > 0) {
+      const avgNewDraws = Math.ceil(newItemDrawSum / newItemSamples);
+      const avgNewBudget = isPack
+        ? Math.ceil(avgNewDraws / packSize) * buy
+        : buy + (avgNewDraws - 1) * (buy - sell);
+      newItemInfoEl.innerHTML = `До отримання нового предмета: ${formatBudgetDetails(avgNewDraws, avgNewBudget)}`;
+    } else {
+      newItemInfoEl.textContent = 'До отримання нового предмета: не вдалося оцінити';
+    }
+
+    if (!preserveSelection) {
+      const { budget } = getEconomySettings();
+      state.selectedN = (budget !== null && Number.isFinite(budget) && budget >= 0)
+        ? averageAffordable(budget)
+        : 0;
+    }
+
+    graphHintEl.textContent = '*За умови реінвестування дублікатів (якщо передбачено). Повзунки та графік оновлюються автоматично.';
+    syncPanelsLockUI();
+    renderChartAndStats();
+    saveCustomState();
+  }
+
+  addCatBtn.addEventListener('click', () => {
+    if (state.confirmed || state.categories.length >= 8) return;
+    state.categories.push({ max: 10, chanceText: '', collected: 0 });
+    hideNotice();
+    renderCategoryBuilders();
+    renderSliders();
+    saveCustomState();
   });
 
-  $('collected').textContent = `Зібрано: ${currentTotal} / ${maxTotal}`;
-}
-function requiredBudget(n){
-  const {buy, sell} = settings();
-  if(n <= 0) return 0;
-
-  // Базовий бюджет (якщо всі попередні спроби — дублікати)
-  const base = buy + (n - 1) * (buy - sell);
-  const remaining = collected().reduce((sum, val, i) => sum + (categoryDefs[i].total - val), 0);
-
-  // Якщо залишився 0 або 1 предмет, до моменту його отримання всі попередні — дублікати
-  if (sell <= 0 || remaining <= 1) return base;
-
-  let total = 0;
-  for(const tr of trials){
-    if(n <= tr.draws) total += tr.thresholds[n-1];
-    else total += tr.completionBudget + buy + (n - tr.draws - 1) * (buy - sell);
-  }
-  const avg = total / TRIALS;
-  if (avg <= base) return base;
-
-  // Максимальна кількість нових карток, що не продаються до n-ї спроби
-  const maxNewAffectingBudget = Math.min(remaining - 1, n - 1);
-  const k = Math.min(maxNewAffectingBudget, Math.round((avg - base) / sell));
-
-  return base + k * sell;
-}
-
-function averageAffordable(budget){
-  const {buy} = settings();
-  if (!Number.isFinite(budget) || budget < buy) return 0;
-
-  let lo = 1;
-  let hi = 10000;
-  while (lo < hi) {
-    const mid = (lo + hi + 1) >> 1;
-    if (requiredBudget(mid) <= budget) lo = mid;
-    else hi = mid - 1;
-  }
-  return lo;
-}
-
-function probability(n){
-  if(n<=0)return completionSorted[0]===0?1:0;
-  let lo=0,hi=completionSorted.length;
-  while(lo<hi){const mid=(lo+hi)>>1;if(completionSorted[mid]<=n)lo=mid+1;else hi=mid;}
-  return lo/TRIALS;
-}
-function xPos(n){return L+(n/graphMax)*pw;}
-function yPos(p){return T+(1-p)*ph;}
-function renderInvalid(){
-  plot.innerHTML='';
-  $('selectedInfo').textContent='Перевірте ціни: ціна купівлі має бути більшою за нуль, а ціна дубліката — не меншою за нуль і меншою за ціну купівлі.';
-  $('meanInfo').textContent='До завершення колекції: —';
-  $('newItemInfo').textContent='До отримання нової картки: —';
-}
-function render(){
-  if(!valid)return;
-  const meanX=Math.ceil(meanCompletion);
-  graphMax=Math.max(100,Math.ceil(meanCompletion*1.8),selectedN+20,Math.ceil(meanX*1.5));
-  graphMax=Math.min(graphMax,10000);
-  const ticks=[0,25,50,75,100];
-  let s='';
-  ticks.forEach(p=>{
-    const y=yPos(p/100);
-    s+=`<line class="gridline" x1="${L}" y1="${y}" x2="${W-R}" y2="${y}"/>`;
-    s+=`<text class="tick" x="${L-10}" y="${y+4}" text-anchor="end">${p}%</text>`;
+  removeCatBtn.addEventListener('click', () => {
+    if (state.confirmed || state.categories.length <= 1) return;
+    state.categories.pop();
+    hideNotice();
+    renderCategoryBuilders();
+    renderSliders();
+    saveCustomState();
   });
-  const xTicks=5;
-  for(let i=0;i<=xTicks;i++){
-    const n=Math.round(graphMax*i/xTicks),x=xPos(n);
-    s+=`<line class="gridline" x1="${x}" y1="${T}" x2="${x}" y2="${H-B}"/>`;
-    s+=`<text class="tick" x="${x}" y="${H-B+19}" text-anchor="middle">${n}</text>`;
+
+  editChanceBtn.addEventListener('click', () => {
+    hideNotice();
+    const firstInput = catListEl.querySelector('input[type=number]');
+    if (firstInput) firstInput.focus();
+  });
+
+  normalizeChanceBtn.addEventListener('click', () => {
+    normalizeChances();
+  });
+
+  confirmBtn.addEventListener('click', () => {
+    if (state.confirmed) {
+      // Перехід у режим редагування колекції
+      state.confirmed = false;
+      state.calculated = false;
+      state.valid = false;
+      hideNotice();
+      renderCategoryBuilders();
+      renderSliders();
+      syncPanelsLockUI();
+      saveCustomState();
+      return;
+    }
+
+    // Валідація максимумів
+    state.categories.forEach(c => {
+      if (!Number.isFinite(c.max) || c.max < 1) c.max = 1;
+      c.collected = clamp(c.collected, 0, c.max);
+    });
+
+    const chanceRes = evaluateChances();
+    if (!chanceRes.ok) {
+      showNotice(chanceRes.message, chanceRes.canNormalize);
+      return;
+    }
+
+    // Підставляємо розраховані відсотки прямо в інпути шансів
+    state.categories.forEach((c, idx) => {
+      c.chanceText = String(chanceRes.chances[idx]);
+    });
+
+    hideNotice();
+    state.confirmed = true;
+    state.calculated = false;
+    renderCategoryBuilders();
+    renderSliders();
+    syncPanelsLockUI();
+    saveCustomState();
+  });
+
+  modeSingleEl.addEventListener('change', () => {
+    syncEconomyModeUI();
+    saveCustomState();
+    if (state.confirmed && state.calculated) simulate();
+  });
+
+  modePackEl.addEventListener('change', () => {
+    syncEconomyModeUI();
+    saveCustomState();
+    if (state.confirmed && state.calculated) simulate();
+  });
+
+  [buyEl, packSizeEl, sellEl].forEach(el => {
+    el.addEventListener('input', () => {
+      saveCustomState();
+      if (state.confirmed && state.calculated) simulate();
+    });
+  });
+
+  budgetEl.addEventListener('input', () => {
+    saveCustomState();
+    if (!state.confirmed || !state.calculated || !state.valid) return;
+    const { budget, budgetText } = getEconomySettings();
+    if (budgetText === '' || !Number.isFinite(budget) || budget < 0) {
+      state.selectedN = 0;
+      renderChartAndStats();
+      saveCustomState();
+      return;
+    }
+    state.selectedN = averageAffordable(budget);
+    renderChartAndStats();
+    saveCustomState();
+  });
+
+  calcBtn.addEventListener('click', () => {
+    if (!state.confirmed) return;
+    simulate({ preserveSelection: false });
+  });
+
+  function setBudgetForSelection(n) {
+    const target = clamp(Math.round(n), 0, MAX_DRAWS);
+    const amount = requiredBudget(target);
+    budgetEl.value = String(amount);
+    state.selectedN = target;
+    renderChartAndStats();
+    saveCustomState();
   }
-  s+=`<line class="axis" x1="${L}" y1="${T}" x2="${L}" y2="${H-B}"/>`;
-  s+=`<line class="axis" x1="${L}" y1="${H-B}" x2="${W-R}" y2="${H-B}"/>`;
-  s+=`<text class="axis-title" x="${L+pw/2}" y="${H-8}" text-anchor="middle">Придбано штук</text>`;
-  s+=`<text class="axis-title" transform="translate(14 ${T+ph/2}) rotate(-90)" text-anchor="middle">Ймовірність</text>`;
-  let path='';
-  const samples=100;
-  for(let i=0;i<=samples;i++){
-    const n=Math.round(graphMax*i/samples);
-    const x=xPos(n),y=yPos(probability(n));
-    path+=(i===0?'M':'L')+x.toFixed(2)+' '+y.toFixed(2)+' ';
+
+  function graphNFromEvent(e) {
+    const rect = chartEl.getBoundingClientRect();
+    if (!rect.width) return state.selectedN;
+    const x = (e.clientX - rect.left) * (W / rect.width);
+    return clamp(Math.round((x - L) / pw * state.graphMax), 0, state.graphMax);
   }
-  s+=`<path class="curve" d="${path}"/>`;
-  const mx=xPos(clamp(selectedN,0,graphMax));
-  const mp=probability(selectedN), my=yPos(mp);
-  s+=`<line class="marker" x1="${mx}" y1="${T}" x2="${mx}" y2="${H-B}"/>`;
-  s+=`<circle class="marker-dot" cx="${mx}" cy="${my}" r="5"/>`;
-  s+=`<text class="marker-label" x="${clamp(mx+7,L+4,W-R-72)}" y="${T+13}">${selectedN} шт.</text>`;
-  plot.innerHTML=s;
-    $('selectedInfo').textContent=`Придбано штук: ${selectedN} · Ймовірність: ${(mp*100).toFixed(1)}%`;
-  const meanDraws = Math.ceil(meanCompletion);
-  const meanBudget = requiredBudget(meanDraws);
-  $('meanInfo').innerHTML = `До завершення колекції: <b>${meanDraws} шт.</b> (${meanBudget} купонів)`;
+
+  chartEl.addEventListener('pointerdown', e => {
+    if (!state.confirmed || !state.calculated || !state.valid) return;
+    state.dragging = true;
+    chartEl.setPointerCapture(e.pointerId);
+    setBudgetForSelection(graphNFromEvent(e));
+    e.preventDefault();
+  });
+
+  chartEl.addEventListener('pointermove', e => {
+    if (!state.dragging) return;
+    setBudgetForSelection(graphNFromEvent(e));
+  });
+
+  chartEl.addEventListener('pointerup', () => { state.dragging = false; });
+  chartEl.addEventListener('pointercancel', () => { state.dragging = false; });
+
+  renderCategoryBuilders();
+  renderSliders();
+  syncPanelsLockUI();
+
+  return {
+    onActivate() {
+      if (state.confirmed && state.calculated) {
+        if (state.trials.length === 0) {
+          simulate({ preserveSelection: state.selectedN > 0 && budgetEl.value.trim() === '' });
+        } else {
+          renderChartAndStats();
+        }
+      }
+    }
+  };
 }
-function setBudgetForSelection(n){
-  const target=clamp(Math.round(n),0,10000);
-  const amount=requiredBudget(target);
-  $('budget').value=String(amount);
-  selectedN=target;
-  render();
+
+// =========================================================
+// ІНІЦІАЛІЗАЦІЯ ВКЛАДОК
+// =========================================================
+const cardsTab = createFixedTab({
+  prefix: 'cards',
+  newItemNoun: 'нової картки',
+  categories: [
+    { id: 'cards-common', count: 'cards-commonCount', total: 18, p: .67 },
+    { id: 'cards-rare', count: 'cards-rareCount', total: 13, p: .20 },
+    { id: 'cards-epi', count: 'cards-epiCount', total: 10, p: .10 },
+    { id: 'cards-leg', count: 'cards-legCount', total: 7, p: .03 }
+  ],
+  pickCategory(r) {
+    if (r < .03) return 3;
+    if (r < .13) return 2;
+    if (r < .33) return 1;
+    return 0;
+  }
+});
+
+const itemsTab = createFixedTab({
+  prefix: 'items',
+  newItemNoun: 'нового предмета',
+  categories: [
+    { id: 'items-common', count: 'items-commonCount', total: 12, p: .53 },
+    { id: 'items-uncommon', count: 'items-uncommonCount', total: 14, p: .20 },
+    { id: 'items-rare', count: 'items-rareCount', total: 22, p: .15 },
+    { id: 'items-epi', count: 'items-epiCount', total: 31, p: .09 },
+    { id: 'items-leg', count: 'items-legCount', total: 23, p: .03 }
+  ],
+  pickCategory(r) {
+    if (r < .53) return 0;
+    if (r < .73) return 1;
+    if (r < .88) return 2;
+    if (r < .97) return 3;
+    return 4;
+  }
+});
+
+const customTab = createCustomTab();
+
+const tabs = [
+  { btn: $('tabBtnCards'), panel: $('tabPanelCards'), controller: cardsTab },
+  { btn: $('tabBtnItems'), panel: $('tabPanelItems'), controller: itemsTab },
+  { btn: $('tabBtnCustom'), panel: $('tabPanelCustom'), controller: customTab }
+];
+
+function activateTab(activeIndex) {
+  const idx = clamp(activeIndex, 0, tabs.length - 1);
+  tabs.forEach((t, i) => {
+    const isSelected = i === idx;
+    t.btn.setAttribute('aria-selected', String(isSelected));
+    t.panel.hidden = !isSelected;
+  });
+  savedAll.activeTab = idx;
+  persistAll();
+  tabs[idx].controller.onActivate();
 }
-function graphNFromEvent(e){
-  const rect=chart.getBoundingClientRect();
-  const x=(e.clientX-rect.left)*(W/rect.width);
-  return clamp(Math.round((x-L)/pw*graphMax),0,graphMax);
-}
-let dragging=false;
-chart.addEventListener('pointerdown',e=>{
-  if(!valid)return;
-  dragging=true;
-  chart.setPointerCapture(e.pointerId);
-  setBudgetForSelection(graphNFromEvent(e));
-  e.preventDefault();
+
+tabs.forEach((t, idx) => {
+  t.btn.addEventListener('click', () => activateTab(idx));
 });
-chart.addEventListener('pointermove',e=>{
-  if(!dragging)return;
-  setBudgetForSelection(graphNFromEvent(e));
-});
-chart.addEventListener('pointerup',()=>{dragging=false;});
-chart.addEventListener('pointercancel',()=>{dragging=false;});
-$('budget').addEventListener('input',()=>{
-  if(!valid)return;
-  const {budget,budgetText}=settings();
-  if(budgetText===''||!Number.isFinite(budget)||budget<0){selectedN=0;render();return;}
-  selectedN=averageAffordable(budget);render();
-});
-if ($('buy')) $('buy').addEventListener('change', simulate);
-if ($('sell')) $('sell').addEventListener('change', simulate);
-categoryDefs.forEach(c=>$(c.id).addEventListener('input',()=>{
-  updateCountLabels();simulate();
-}));
-updateCountLabels();
-simulate();
+
+const initialTab = Number.isInteger(savedAll.activeTab) ? savedAll.activeTab : 0;
+activateTab(initialTab);
+
 if (window.Telegram && Telegram.WebApp) {
   Telegram.WebApp.ready();
 
@@ -648,10 +1694,8 @@ if (window.Telegram && Telegram.WebApp) {
     );
   }
 }
-
- 
 })();
 </script>
-
+</main>
 </body>
 </html>
